@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home_GoChat</title>
+    <script src="/static/js/home.js"></script>
+</head>
+<style>
+    *{
+        margin: 0;
+        padding: 0;
+    }
+    ul{
+        border: 1px solid gray;
+        width: 400px;
+        height: 500px;
+        margin: 0 auto;
+        background: white;
+        text-align: left;
+        overflow: auto;
+        line-height: 30px;
+    }
+    li{
+        list-style-type: none;
+    }
+</style>
+<body>
+<div style="text-align: center">
+    <div>
+        <ul>
+            {{range .}}
+            <li><a href="/room/{{.ID}}" id="{{.ID}}">{{.RoomName}}</a></li>
+            {{end}}
+        </ul>
+    </div>
+    <div>
+        <button onclick="btnClick()">New</button>
+    </div>
+</div>
+
+</body>
+</html>
