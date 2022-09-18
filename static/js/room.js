@@ -1,5 +1,6 @@
 var ws=null;
-var uri="ws://localhost:8080/room/ws"
+var uri="ws://localhost/room/ws" // reverse proxy
+// var uri="ws://localhost:8080/room/ws"
 var userId,username,roomId;
 function wsConnect(){
     userId=document.getElementById("userId").value;

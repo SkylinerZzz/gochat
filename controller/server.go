@@ -22,11 +22,11 @@ type Message struct {
 
 var (
 	mutex   = sync.Mutex{}
-	rooms   = map[string][]Client{} // map clients to the room
-	users   = make(map[string]bool) //user mapping
-	enter   = make(chan Client)
-	leave   = make(chan Client)
-	message = make(chan Message)
+	rooms   = make(map[string][]Client) // map clients to the room
+	users   = make(map[string]bool)     //user mapping
+	enter   = make(chan Client, 10)
+	leave   = make(chan Client, 10)
+	message = make(chan Message, 100)
 )
 
 // message type

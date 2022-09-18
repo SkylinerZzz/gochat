@@ -9,6 +9,7 @@ import (
 func InitRouter(r *gin.Engine) *gin.Engine {
 	r.LoadHTMLGlob("view/*")
 	r.Static("/static", "./static")
+	r.StaticFile("/favicon.ico", "./static/icon/favicon.ico")
 	sr := r.Group("/", session.EnableSession())
 	{
 		sr.GET("/login", controller.LoginPage)
