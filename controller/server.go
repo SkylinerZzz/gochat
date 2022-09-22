@@ -21,18 +21,22 @@ type Message struct {
 }
 
 var (
-	mutex   = sync.Mutex{}
-	rooms   = make(map[string][]Client) // map clients to the room
-	users   = make(map[string]bool)     //user mapping
+	mutex   = sync.Mutex{}                     // ensure rooms and users concurrency security
+	once    = sync.RWMutex{}                   // ensure users[string] should be initialized once
+	rooms   = make(map[string][]Client)        // map clients to the room
+	users   = make(map[string]map[string]bool) //user mapping
 	enter   = make(chan Client, 10)
 	leave   = make(chan Client, 10)
 	message = make(chan Message, 100)
 )
 
 // message type
-const msgTypeOnline = 1
-const msgTypeSend = 2
-const msgTypeOffline = 3
+const (
+	_ = iota
+	msgTypeOnline
+	msgTypeSend
+	msgTypeOffline
+)
 
 func Run(c *gin.Context) {
 	ws, _ := (&websocket.Upgrader{}).Upgrade(c.Writer, c.Request, nil)
@@ -89,32 +93,20 @@ func write(done chan struct{}) {
 	for {
 		select {
 		case e := <-enter:
-			mutex.Lock()
-			if _, ok := users[e.Username]; !ok {
-				rooms[e.RoomId] = append(rooms[e.RoomId], e)
-				users[e.Username] = true
+			// initial users mapping once
+			once.RLock()
+			if users[e.RoomId] != nil {
+				entering(e)
 			}
-			logrus.WithFields(logrus.Fields{
-				"roomId":   e.RoomId,
-				"roomSize": len(rooms[e.RoomId]),
-				"username": e.Username,
-			}).Info("an user enter into the room")
-			mutex.Unlock()
+			once.RUnlock()
+			once.Lock()
+			if users[e.RoomId] == nil {
+				users[e.RoomId] = make(map[string]bool)
+			}
+			entering(e)
+			once.Unlock()
 		case l := <-leave:
-			mutex.Lock()
-			if _, ok := users[l.Username]; ok {
-				// delete client mapping
-				delete(users, l.Username)
-				index := 0
-				for _, v := range rooms[l.RoomId] {
-					if v.Username != l.Username {
-						rooms[l.RoomId][index] = v
-						index++
-					}
-				}
-				rooms[l.RoomId] = rooms[l.RoomId][:index]
-			}
-			mutex.Unlock()
+			leaving(l)
 		case msg := <-message:
 			logrus.Info("broadcasting ...")
 			roomId := msg.Data.(map[string]interface{})["roomId"].(string)
@@ -130,7 +122,37 @@ func write(done chan struct{}) {
 		}
 	}
 }
-
+func entering(c Client) {
+	// update users mapping while entering
+	mutex.Lock()
+	if _, ok := users[c.RoomId][c.Username]; !ok {
+		rooms[c.RoomId] = append(rooms[c.RoomId], c)
+		users[c.RoomId][c.Username] = true
+	}
+	logrus.WithFields(logrus.Fields{
+		"roomId":   c.RoomId,
+		"roomSize": len(rooms[c.RoomId]),
+		"username": c.Username,
+	}).Info("an user enter into the room")
+	mutex.Unlock()
+}
+func leaving(c Client) {
+	// update users mapping while leaving
+	mutex.Lock()
+	if _, ok := users[c.RoomId][c.Username]; ok {
+		// delete client mapping
+		delete(users[c.RoomId], c.Username)
+		index := 0
+		for _, v := range rooms[c.RoomId] {
+			if v.Username != c.Username {
+				rooms[c.RoomId][index] = v
+				index++
+			}
+		}
+		rooms[c.RoomId] = rooms[c.RoomId][:index]
+	}
+	mutex.Unlock()
+}
 func formatMessage(msg Message) []byte {
 	data := make(map[string]interface{})
 	switch msg.MsgType {
