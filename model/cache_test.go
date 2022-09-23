@@ -6,13 +6,8 @@ import (
 )
 
 func TestAddUserToCache(t *testing.T) {
-	var u User
-	u = FindUserById(1)
-	AddUserToCache(u)
-	u, ok := FindUserByNameFromCache("Skyliner")
-	if ok {
-		fmt.Println("hit cache", u.Password)
-	} else {
-		fmt.Println("failed", u.CreatedAt)
+	rs := ListAllRoomsFromCache()
+	for _, r := range rs {
+		fmt.Println(r.RoomName)
 	}
 }
