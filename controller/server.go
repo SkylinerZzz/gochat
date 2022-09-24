@@ -24,7 +24,7 @@ var (
 	mutex   = sync.Mutex{}                     // ensure rooms and users concurrency security
 	once    = sync.RWMutex{}                   // ensure users[string] should be initialized once
 	rooms   = make(map[string][]Client)        // map clients to the room
-	users   = make(map[string]map[string]bool) //user mapping
+	users   = make(map[string]map[string]bool) //user mapping, avoid duplicate connections
 	enter   = make(chan Client, 10)
 	leave   = make(chan Client, 10)
 	message = make(chan Message, 100)
