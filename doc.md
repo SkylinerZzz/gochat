@@ -21,6 +21,8 @@
             |-session.go    
         |-sql //DDL
         |-static            /* icon and js, craete websocket connection */
+        |-util              /* utility */
+            |-safemap.go    // safe map
         |-view              /* foreground */
         |-main.go           // run this project!
 ```
@@ -37,11 +39,10 @@
         Data    interface{} `json:"data"`
     }
 
-    var (
-        mutex   = sync.Mutex{}                     
+    var (                   
         once    = sync.RWMutex{}
-        rooms   = make(map[string][]Client)
-        users   = make(map[string]map[string]bool)
+        rooms   = make(map[string]*ClientSlice)
+        users   = make(map[string]*UserMap)
         enter   = make(chan Client, 10)
         leave   = make(chan Client, 10)
         message = make(chan Message, 100)

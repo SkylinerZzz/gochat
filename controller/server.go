@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 	"gochat/model"
+	"gochat/util"
 	"strconv"
 	"sync"
 )
@@ -20,11 +21,48 @@ type Message struct {
 	Data    interface{} `json:"data"`
 }
 
+type ClientSlice struct { // safe client slice
+	mu   sync.RWMutex
+	data []Client
+}
+
+func NewRoomSlice() *ClientSlice {
+	return &ClientSlice{
+		mu:   sync.RWMutex{},
+		data: []Client{},
+	}
+}
+func (r *ClientSlice) Remove(username string) { // remove client mapping
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	index := 0
+	for _, v := range r.data {
+		if v.Username != username {
+			r.data[index] = v
+			index++
+		}
+	}
+	r.data = r.data[:index]
+}
+func (r *ClientSlice) Append(c Client) { // add client mapping
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.data = append(r.data, c)
+}
+func (r *ClientSlice) Broadcast(msg Message) { // broadcast message in certain room
+	clients := r.data
+	for _, c := range clients {
+		err := c.Conn.WriteMessage(websocket.TextMessage, formatMessage(msg))
+		if err != nil {
+			logrus.Warn(err)
+		}
+	}
+}
+
 var (
-	mutex   = sync.Mutex{}                     // ensure rooms and users concurrency security
-	once    = sync.RWMutex{}                   // ensure users[string] should be initialized once
-	rooms   = make(map[string][]Client)        // map clients to the room
-	users   = make(map[string]map[string]bool) //user mapping, avoid duplicate connections
+	once    = sync.RWMutex{}                 // ensure users[string] should be initialized once
+	rooms   = make(map[string]*ClientSlice)  // map clients to the room
+	users   = make(map[string]*util.UserMap) //user mapping, avoid duplicate connections
 	enter   = make(chan Client, 10)
 	leave   = make(chan Client, 10)
 	message = make(chan Message, 100)
@@ -95,13 +133,16 @@ func write(done chan struct{}) {
 		case e := <-enter:
 			// initial users mapping once
 			once.RLock()
-			if users[e.RoomId] != nil {
+			if users[e.RoomId] != nil && rooms[e.RoomId] != nil {
 				entering(e)
 			}
 			once.RUnlock()
 			once.Lock()
 			if users[e.RoomId] == nil {
-				users[e.RoomId] = make(map[string]bool)
+				users[e.RoomId] = util.NewUserMap()
+			}
+			if rooms[e.RoomId] == nil {
+				rooms[e.RoomId] = NewRoomSlice()
 			}
 			entering(e)
 			once.Unlock()
@@ -110,12 +151,10 @@ func write(done chan struct{}) {
 		case msg := <-message:
 			logrus.Info("broadcasting ...")
 			roomId := msg.Data.(map[string]interface{})["roomId"].(string)
-			clients := rooms[roomId]
-			for _, c := range clients {
-				err := c.Conn.WriteMessage(websocket.TextMessage, formatMessage(msg))
-				if err != nil {
-					logrus.Warn(err)
-				}
+			if rooms[roomId] != nil {
+				rooms[roomId].Broadcast(msg)
+			} else {
+				logrus.Warn("room map not be initialized yet!")
 			}
 		case <-done:
 			return
@@ -124,34 +163,22 @@ func write(done chan struct{}) {
 }
 func entering(c Client) {
 	// update users mapping while entering
-	mutex.Lock()
-	if _, ok := users[c.RoomId][c.Username]; !ok {
-		rooms[c.RoomId] = append(rooms[c.RoomId], c)
-		users[c.RoomId][c.Username] = true
+	if _, ok := users[c.RoomId].Read(c.Username); !ok {
+		users[c.RoomId].Write(c.Username, true)
+		rooms[c.RoomId].Append(c)
 	}
 	logrus.WithFields(logrus.Fields{
 		"roomId":   c.RoomId,
-		"roomSize": len(rooms[c.RoomId]),
+		"roomSize": len(rooms[c.RoomId].data),
 		"username": c.Username,
 	}).Info("an user enter into the room")
-	mutex.Unlock()
 }
 func leaving(c Client) {
 	// update users mapping while leaving
-	mutex.Lock()
-	if _, ok := users[c.RoomId][c.Username]; ok {
-		// delete client mapping
-		delete(users[c.RoomId], c.Username)
-		index := 0
-		for _, v := range rooms[c.RoomId] {
-			if v.Username != c.Username {
-				rooms[c.RoomId][index] = v
-				index++
-			}
-		}
-		rooms[c.RoomId] = rooms[c.RoomId][:index]
+	if _, ok := users[c.RoomId].Read(c.Username); ok {
+		users[c.RoomId].Delete(c.Username)
+		rooms[c.RoomId].Remove(c.Username)
 	}
-	mutex.Unlock()
 }
 func formatMessage(msg Message) []byte {
 	data := make(map[string]interface{})
