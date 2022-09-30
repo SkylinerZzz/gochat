@@ -50,8 +50,9 @@ func (r *ClientSlice) Append(c Client) { // add client mapping
 	r.data = append(r.data, c)
 }
 func (r *ClientSlice) Broadcast(msg Message) { // broadcast message in certain room
-	clients := r.data
-	for _, c := range clients {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	for _, c := range r.data {
 		err := c.Conn.WriteMessage(websocket.TextMessage, formatMessage(msg))
 		if err != nil {
 			logrus.Warn(err)
@@ -62,7 +63,7 @@ func (r *ClientSlice) Broadcast(msg Message) { // broadcast message in certain r
 var (
 	once    = sync.RWMutex{}                 // ensure users[string] should be initialized once
 	rooms   = make(map[string]*ClientSlice)  // map clients to the room
-	users   = make(map[string]*util.UserMap) //user mapping, avoid duplicate connections
+	users   = make(map[string]*util.UserMap) // user mapping, avoid duplicate connections
 	enter   = make(chan Client, 10)
 	leave   = make(chan Client, 10)
 	message = make(chan Message, 100)
