@@ -5,12 +5,12 @@ import (
 	"testing"
 )
 
-func Test_loadConfig(t *testing.T) {
+func TestLoadConfig(t *testing.T) {
 	loadConfig("../config")
 	fmt.Println(Config)
 }
 
-func Test_init(t *testing.T) {
+func TestInit(t *testing.T) {
 	loadConfig("../config")
 	initRedis()
 	initDB()

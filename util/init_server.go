@@ -5,20 +5,22 @@ import (
 	"github.com/gomodule/redigo/redis"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"gochat/pkg/queue"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"time"
 )
 
 var (
-	Config    map[string]string // server configs
-	RedisPool *redis.Pool       // redis connection pool
-	RedisConn *redis.Conn       // redis connection
-	DB        *gorm.DB          // mysql handler
+	Config      map[string]string // server configs
+	RedisPool   *redis.Pool       // redis connection pool
+	RedisClient *redis.Conn       // redis connection
+	RedisQueue  *queue.RedisNode  // redis mq
+	DB          *gorm.DB          // mysql handler
 )
 
-func init() {
-	loadConfig("../config")
+func Init(dir string) {
+	loadConfig(dir)
 	initRedis()
 	initDB()
 }
@@ -47,16 +49,17 @@ func initRedis() {
 		MaxActive:   16,
 		IdleTimeout: 60 * time.Second,
 		Dial: func() (redis.Conn, error) {
-			addr := fmt.Sprintf("%s:%s", Config["redis_host"], Config["redis_port"])
 			return redis.Dial("tcp", addr, redis.DialPassword(Config["redis_password"]))
 		},
 	}
-	// init RedisConn
+	// init RedisClient
 	conn, err := redis.Dial("tcp", addr, redis.DialPassword(Config["redis_password"]))
 	if err != nil {
 		log.Fatalf("failed to connect to redis, err = %s", err)
 	}
-	RedisConn = &conn
+	RedisClient = &conn
+	// init RedisQueue
+	RedisQueue = queue.NewRedisNode(RedisPool, RedisClient)
 }
 
 func initDB() {
