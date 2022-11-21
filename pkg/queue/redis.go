@@ -3,6 +3,8 @@ package queue
 import (
 	"encoding/json"
 	"errors"
+	"time"
+
 	"github.com/gomodule/redigo/redis"
 	log "github.com/sirupsen/logrus"
 )
@@ -20,10 +22,10 @@ func NewRedisNode(pool *redis.Pool, client *redis.Conn) *RedisNode {
 	}
 }
 
-func (r *RedisNode) ReceiveMessage(queueName string) (Message, error) {
+func (r *RedisNode) ReceiveMessage(queueName string, timeout time.Duration) (Message, error) {
 	conn := r.redisPool.Get()
 	defer conn.Close()
-	data, err := redis.Strings(conn.Do("BLPOP", queueName, 5))
+	data, err := redis.Strings(conn.Do("BLPOP", queueName, int(timeout.Seconds())))
 	if err != nil {
 		if errors.Is(err, redis.ErrNil) {
 			return Message{}, errors.New("queue is empty")

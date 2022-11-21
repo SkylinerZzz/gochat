@@ -1,5 +1,7 @@
 package queue
 
+import "time"
+
 // Message definition
 type Message struct {
 	Data      string `json:"data"`       // raw data
@@ -14,7 +16,7 @@ type Queue interface {
 
 // Consumer interface
 type Consumer interface {
-	ReceiveMessage(queueName string) (Message, error)
+	ReceiveMessage(queueName string, timeout time.Duration) (Message, error)
 	Subscribe(channel string) <-chan Message
 }
 

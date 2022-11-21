@@ -22,7 +22,7 @@ func TestQueue(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	resp, err := q.ReceiveMessage(testQueue)
+	resp, err := q.ReceiveMessage(testQueue, 5*time.Second)
 	if err != nil {
 		t.Error(err)
 	}
