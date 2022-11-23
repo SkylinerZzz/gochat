@@ -8,8 +8,8 @@ type Message struct {
 	QueueName string `json:"queue_name"` // owner
 }
 
-// Queue interface
-type Queue interface {
+// Node interface
+type Node interface {
 	Consumer
 	Provider
 }

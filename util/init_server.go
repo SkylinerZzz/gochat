@@ -15,13 +15,14 @@ var (
 	Config      map[string]string // server configs
 	RedisPool   *redis.Pool       // redis connection pool
 	RedisClient *redis.Conn       // redis connection
-	RedisQueue  *queue.RedisNode  // redis mq
+	RedisQueue  *queue.Queue      // redis message queue
 	DB          *gorm.DB          // mysql handler
 )
 
 func Init(dir string) {
 	loadConfig(dir)
 	initRedis()
+	initQueue()
 	initDB()
 }
 
@@ -58,8 +59,14 @@ func initRedis() {
 		log.Fatalf("failed to connect to redis, err = %s", err)
 	}
 	RedisClient = &conn
-	// init RedisQueue
-	RedisQueue = queue.NewRedisNode(RedisPool, RedisClient)
+}
+
+func initQueue() {
+	var err error
+	RedisQueue, err = queue.NewQueue(Config)
+	if err != nil {
+		log.Fatalf("failed to init queue, err = %s", err)
+	}
 }
 
 func initDB() {

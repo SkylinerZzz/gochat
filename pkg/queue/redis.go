@@ -3,6 +3,7 @@ package queue
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/gomodule/redigo/redis"
@@ -15,11 +16,23 @@ type RedisNode struct {
 	redisClient *redis.Conn // redis connection
 }
 
-func NewRedisNode(pool *redis.Pool, client *redis.Conn) *RedisNode {
-	return &RedisNode{
-		redisPool:   pool,
-		redisClient: client,
+func NewRedisNode(config map[string]string) (*RedisNode, error) {
+	addr := fmt.Sprintf("%s:%s", config["redis_host"], config["redis_port"])
+	pool := &redis.Pool{
+		MaxIdle:     1024,
+		MaxActive:   16,
+		IdleTimeout: 60 * time.Second,
+		Dial: func() (redis.Conn, error) {
+			return redis.Dial("tcp", addr, redis.DialPassword(config["redis_password"]))
+		},
 	}
+	// init RedisClient
+	conn, err := redis.Dial("tcp", addr, redis.DialPassword(config["redis_password"]))
+	if err != nil {
+		log.Errorf("[RedisNode] failed to connect to redis, err = %s", err)
+		return nil, err
+	}
+	return &RedisNode{redisPool: pool, redisClient: &conn}, nil
 }
 
 func (r *RedisNode) ReceiveMessage(queueName string, timeout time.Duration) (Message, error) {
