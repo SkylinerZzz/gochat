@@ -14,7 +14,7 @@ type QueueTaskAdapter struct {
 	queue     *queue.Queue       // message queue
 	queueName string             // input queue name
 	timeout   time.Duration      // QueueTask timeout
-	maxWorker int                // maximum numer of goroutinue pool workers
+	maxWorker int                // maximum number of goroutine pool workers
 	ctx       context.Context    // context
 	cancel    context.CancelFunc // cancel function
 }
@@ -32,8 +32,8 @@ func NewQueueTaskAdapter(task QueueTask, queue *queue.Queue, queueName string, t
 	}
 }
 
-// receive and process message constantly
-func (adapter *QueueTaskAdapter) Run() {
+// Start receives and processes message constantly
+func (adapter *QueueTaskAdapter) Start() {
 	p, _ := ants.NewPool(adapter.maxWorker)
 	defer p.Release()
 	for {
@@ -47,6 +47,7 @@ func (adapter *QueueTaskAdapter) Run() {
 			if err != nil {
 				log.WithFields(log.Fields{
 					"queueName": adapter.queueName,
+					"taskName":  adapter.task.Name(),
 				}).Errorf("[QueueTaskAdapter] failed to receive message, err = %s", err)
 				continue
 			}
@@ -70,12 +71,14 @@ func (adapter *QueueTaskAdapter) process(message queue.Message) {
 	if err != nil {
 		log.WithFields(log.Fields{
 			"queueName": message.QueueName,
+			"taskName":  adapter.task.Name(),
 			"data":      message.Data,
 		}).Errorf("[QueueTaskAdapter] failed to process message, err = %s", err)
 		return
 	}
 	log.WithFields(log.Fields{
 		"queueName": message.QueueName,
+		"taskName":  adapter.task.Name(),
 		"data":      message.Data,
 	}).Info("[QueueTaskAdapter] process message successfully")
 }

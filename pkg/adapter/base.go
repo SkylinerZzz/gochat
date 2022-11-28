@@ -7,4 +7,5 @@ import (
 
 type QueueTask interface {
 	Run(ctx context.Context, message queue.Message) error
+	Name() string
 }
