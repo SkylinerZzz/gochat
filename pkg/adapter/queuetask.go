@@ -64,7 +64,8 @@ func (adapter *QueueTaskAdapter) Terminate() {
 
 // process message once
 func (adapter *QueueTaskAdapter) process(message queue.Message) {
-	ctx, _ := context.WithTimeout(adapter.ctx, adapter.timeout)
+	ctx, cancel := context.WithTimeout(adapter.ctx, adapter.timeout)
+	defer cancel()
 	err := adapter.task.Run(ctx, message)
 	if err != nil {
 		log.WithFields(log.Fields{
