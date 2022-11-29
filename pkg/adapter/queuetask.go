@@ -17,9 +17,10 @@ type QueueTaskAdapter struct {
 	maxWorker int                // maximum number of goroutine pool workers
 	ctx       context.Context    // context
 	cancel    context.CancelFunc // cancel function
+	handler   Handler            // exception handler
 }
 
-func NewQueueTaskAdapter(task QueueTask, queue *queue.Queue, queueName string, timeout time.Duration, maxWorker int) *QueueTaskAdapter {
+func NewQueueTaskAdapter(task QueueTask, queue *queue.Queue, queueName string, timeout time.Duration, maxWorker int, handler Handler) *QueueTaskAdapter {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &QueueTaskAdapter{
 		task:      task,
@@ -29,6 +30,7 @@ func NewQueueTaskAdapter(task QueueTask, queue *queue.Queue, queueName string, t
 		maxWorker: maxWorker,
 		ctx:       ctx,
 		cancel:    cancel,
+		handler:   handler,
 	}
 }
 
@@ -68,6 +70,8 @@ func (adapter *QueueTaskAdapter) process(message queue.Message) {
 	ctx, cancel := context.WithTimeout(adapter.ctx, adapter.timeout)
 	defer cancel()
 	err := adapter.task.Run(ctx, message)
+	// record process result
+	adapter.handler.Run(err)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"queueName": message.QueueName,
