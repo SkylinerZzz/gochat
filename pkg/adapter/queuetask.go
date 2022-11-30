@@ -71,7 +71,7 @@ func (adapter *QueueTaskAdapter) process(message queue.Message) {
 	defer cancel()
 	err := adapter.task.Run(ctx, message)
 	// record process result
-	adapter.handler.Run(err)
+	adapter.handler.Handle(err)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"queueName": message.QueueName,

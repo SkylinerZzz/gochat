@@ -13,6 +13,6 @@ type QueueTask interface {
 
 // Handler interface
 type Handler interface {
-	Run(err error)
+	Handle(err error)
 	Name() string
 }

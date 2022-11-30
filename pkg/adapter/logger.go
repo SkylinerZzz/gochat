@@ -10,7 +10,7 @@ func NewLogger(name string) Logger {
 	return Logger{name: name}
 }
 
-func (l Logger) Run(err error) {
+func (l Logger) Handle(err error) {
 	if err != nil {
 		l.failure++
 	} else {
