@@ -41,7 +41,7 @@ func (r *RedisNode) ReceiveMessage(queueName string, timeout time.Duration) (Mes
 	data, err := redis.Strings(conn.Do("BLPOP", queueName, int(timeout.Seconds())))
 	if err != nil {
 		if errors.Is(err, redis.ErrNil) {
-			return Message{}, errors.New("queue is empty")
+			return Message{}, ErrQueueEmpty
 		}
 		log.Errorf("[ReceiveMessage] failed to receive message, err = %s", err)
 		return Message{}, err

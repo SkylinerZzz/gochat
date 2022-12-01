@@ -1,53 +1,54 @@
-package adapter
+package adapter_test
 
 import (
-	"context"
-	"fmt"
+	"gochat/pkg/adapter"
 	"gochat/pkg/queue"
 	"gochat/util"
 	"strconv"
+	"sync"
 	"testing"
 	"time"
 )
 
-func TestContext(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	c, _ := context.WithTimeout(ctx, 5*time.Second)
-	go doContext(c)
-	time.Sleep(3 * time.Second)
+type TestTask struct {
+	queue     *queue.Queue
+	queueName string
 }
 
-func doContext(ctx context.Context) {
-	for {
-		select {
-		case <-ctx.Done():
-			fmt.Println("done")
-			return
-		default:
-			fmt.Println("run")
-			time.Sleep(1 * time.Second)
+var testTask *TestTask
+var testTaskOnce sync.Once
+
+func NewTestTask(queue *queue.Queue, queueName string) *TestTask {
+	testTaskOnce.Do(func() {
+		testTask = &TestTask{
+			queue:     queue,
+			queueName: queueName,
 		}
+	})
+	return testTask
+}
+
+func (t *TestTask) Run(message queue.Message) (adapter.QueueTaskInfo, adapter.QueueTaskStatus, error) {
+	var info adapter.QueueTaskInfo
+	info.TaskName = t.Name()
+	info.Message = message
+
+	if err := t.queue.SendMessage(t.queueName, message); err != nil {
+		return info, adapter.QueueTaskStatusFailure, err
 	}
+	return info, adapter.QueueTaskStatusSuccess, nil
 }
 
-type service struct{}
-
-func (service) Run(ctx context.Context, message queue.Message) error {
-	fmt.Println(message)
-	return nil
-}
-
-func (service) Name() string {
-	return "service"
+func (t *TestTask) Name() string {
+	return "TestTask"
 }
 
 func TestAdapter(t *testing.T) {
 	util.Init("../../config")
-	queueName := "gochat:test:adapter"
-	task := service{}
+	queueName := "gochat:test:adapter-input"
+	task := NewTestTask(util.RedisQueue, "gochat:test:adapter-output")
 	go func() {
-		for i := 0; i < 100000; i++ {
+		for i := 0; i < 1000; i++ {
 			msg := queue.Message{
 				Data:      strconv.Itoa(i),
 				QueueName: queueName,
@@ -55,10 +56,11 @@ func TestAdapter(t *testing.T) {
 			util.RedisQueue.SendMessage(queueName, msg)
 		}
 	}()
-	logger := NewLogger("logger")
-	adapter := NewQueueTaskAdapter(task, util.RedisQueue, queueName, 5*time.Second, 100, logger)
+
+	logger := adapter.NewLogger()
+	adapter := adapter.NewQueueTaskAdapter(task, util.RedisQueue, queueName, 1*time.Second, 100, logger)
 	go adapter.Start()
-	time.Sleep(1 * time.Minute)
+	time.Sleep(3 * time.Second)
 	adapter.Terminate()
-	fmt.Println("success:", logger.success)
+	logger.Log()
 }

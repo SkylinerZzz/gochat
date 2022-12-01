@@ -1,18 +1,32 @@
 package adapter
 
 import (
-	"context"
 	"gochat/pkg/queue"
 )
 
+// QueueTaskStatus describes processing status of a given task
+type QueueTaskStatus int
+
+const (
+	QueueTaskStatusFailure QueueTaskStatus = iota
+	QueueTaskStatusSuccess
+	QueueTaskStatusTimeout
+)
+
+// QueueTaskInfo describes detail info of a given task about its message and task name
+type QueueTaskInfo struct {
+	Message  queue.Message
+	TaskName string
+}
+
 // QueueTask interface
 type QueueTask interface {
-	Run(ctx context.Context, message queue.Message) error
+	Run(message queue.Message) (QueueTaskInfo, QueueTaskStatus, error)
 	Name() string
 }
 
 // Handler interface
 type Handler interface {
-	Handle(err error)
+	Handle(info QueueTaskInfo, status QueueTaskStatus, err error)
 	Name() string
 }
