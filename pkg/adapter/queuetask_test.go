@@ -28,11 +28,19 @@ func NewTestTask(queue *queue.Queue, queueName string) *TestTask {
 	return testTask
 }
 
-func (t *TestTask) Run(message queue.Message) (adapter.QueueTaskInfo, adapter.QueueTaskStatus, error) {
-	var info adapter.QueueTaskInfo
+func (t *TestTask) Run(message queue.Message) (info adapter.QueueTaskInfo, status adapter.QueueTaskStatus, err error) {
+	start := time.Now()
+	defer func() {
+		info.Duration = time.Since(start)
+	}()
+
 	info.TaskName = t.Name()
 	info.Message = message
 
+	num, _ := strconv.Atoi(message.Data)
+	if num%2 == 0 {
+		time.Sleep(2 * time.Second)
+	}
 	if err := t.queue.SendMessage(t.queueName, message); err != nil {
 		return info, adapter.QueueTaskStatusFailure, err
 	}
@@ -60,7 +68,7 @@ func TestAdapter(t *testing.T) {
 	logger := adapter.NewLogger()
 	adapter := adapter.NewQueueTaskAdapter(task, util.RedisQueue, queueName, 1*time.Second, 100, logger)
 	go adapter.Start()
-	time.Sleep(3 * time.Second)
+	time.Sleep(20 * time.Second)
 	adapter.Terminate()
 	logger.Log()
 }

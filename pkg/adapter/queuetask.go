@@ -76,6 +76,8 @@ func (adapter *QueueTaskAdapter) process(message queue.Message) {
 
 	adapter.pool.Submit(func() {
 		info, status, err := adapter.task.Run(message)
+		// check timeout
+		adapter.checkTimeout(info, &status, err)
 		// record process result
 		adapter.handler.Handle(info, status, err)
 		close(done)
@@ -91,5 +93,11 @@ func (adapter *QueueTaskAdapter) process(message queue.Message) {
 			"taskName":  adapter.task.Name(),
 			"data":      message.Data,
 		}).Errorf("[QueueTaskAdapter] process message timeout")
+	}
+}
+
+func (adapter *QueueTaskAdapter) checkTimeout(info QueueTaskInfo, status *QueueTaskStatus, err error) {
+	if err == nil && info.Duration > adapter.timeout {
+		*status = QueueTaskStatusTimeout
 	}
 }

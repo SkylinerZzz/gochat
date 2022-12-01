@@ -2,6 +2,7 @@ package adapter
 
 import (
 	"gochat/pkg/queue"
+	"time"
 )
 
 // QueueTaskStatus describes processing status of a given task
@@ -17,6 +18,7 @@ const (
 type QueueTaskInfo struct {
 	Message  queue.Message
 	TaskName string
+	Duration time.Duration
 }
 
 // QueueTask interface

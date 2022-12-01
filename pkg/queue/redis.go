@@ -20,8 +20,9 @@ func NewRedisNode(config map[string]string) (*RedisNode, error) {
 	addr := fmt.Sprintf("%s:%s", config["redis_host"], config["redis_port"])
 	pool := &redis.Pool{
 		MaxIdle:     1024,
-		MaxActive:   16,
+		MaxActive:   256,
 		IdleTimeout: 60 * time.Second,
+		Wait:        true,
 		Dial: func() (redis.Conn, error) {
 			return redis.Dial("tcp", addr, redis.DialPassword(config["redis_password"]))
 		},
