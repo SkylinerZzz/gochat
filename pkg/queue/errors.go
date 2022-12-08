@@ -3,5 +3,5 @@ package queue
 import "errors"
 
 var (
-	ErrQueueEmpty = errors.New("RedisQueue: queue is empty")
+	ErrQueueEmpty = errors.New("redisqueue: queue is empty")
 )

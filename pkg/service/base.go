@@ -2,6 +2,6 @@ package service
 
 // Service interface
 type Service interface {
-	Exec(...interface{}) error
+	Exec(val ...interface{}) error
 	Name() string
 }

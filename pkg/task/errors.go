@@ -3,5 +3,5 @@ package task
 import "errors"
 
 var (
-	ErrUnknownWsMessageType = errors.New("unknown type of WsMessage")
+	ErrUnknownWsMessageType = errors.New("queuetask: unknown type of WsMessage")
 )

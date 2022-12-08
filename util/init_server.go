@@ -12,11 +12,10 @@ import (
 )
 
 var (
-	Config      map[string]string // server configs
-	RedisPool   *redis.Pool       // redis connection pool
-	RedisClient *redis.Conn       // redis connection
-	RedisQueue  *queue.Queue      // redis message queue
-	DB          *gorm.DB          // mysql handler
+	Config     map[string]string // server configs
+	RedisPool  *redis.Pool       // redis connection pool
+	RedisQueue *queue.Queue      // redis message queue
+	DB         *gorm.DB          // mysql handler
 )
 
 func Init(dir string) {
@@ -54,12 +53,6 @@ func initRedis() {
 			return redis.Dial("tcp", addr, redis.DialPassword(Config["redis_password"]))
 		},
 	}
-	// init RedisClient
-	conn, err := redis.Dial("tcp", addr, redis.DialPassword(Config["redis_password"]))
-	if err != nil {
-		log.Fatalf("failed to connect to redis, err = %s", err)
-	}
-	RedisClient = &conn
 }
 
 func initQueue() {

@@ -17,6 +17,7 @@ var (
 	ClientMap      = map[string]*sync.Map{} // store WsClient
 )
 
+// type of WsMessage
 const (
 	WsMessageTypeOnline = iota
 	WsMessageTypeContent
@@ -35,4 +36,11 @@ const (
 	DATABUS_CONTENT_HANDLER = "gochat:test:content_handler" // consumer queue of content handler
 	DATABUS_IMAGE_HANDLER   = "gochat:test:image_handler"   // consumer queue of image handler
 	PREFIX_CHANNEL          = "gochat:test:channel:room_"   // prefix of channel
+	PREFIX_USER_LIST        = "gochat:test:list:room_"      // prefix of user list in each room, recording whether a user is offline or online
+)
+
+// status of user
+const (
+	UserStatusOnline = iota
+	UserStatusOffline
 )

@@ -28,7 +28,7 @@ func NewRedisNode(config map[string]string) (*RedisNode, error) {
 		},
 	}
 	// init RedisClient
-	conn, err := redis.Dial("tcp", addr, redis.DialPassword(config["redis_password"]))
+	conn, err := redis.Dial("tcp", addr, redis.DialPassword(config["redis_password"]), redis.DialKeepAlive(5*time.Minute))
 	if err != nil {
 		log.Errorf("[RedisNode] failed to connect to redis, err = %s", err)
 		return nil, err
@@ -94,9 +94,16 @@ func (r *RedisNode) Subscribe(channel string) <-chan Message {
 		for {
 			switch msg := pubSubConn.Receive().(type) {
 			case redis.Subscription:
-				log.WithFields(log.Fields{
-					"channel": msg.Channel,
-				}).Info("[Subscribe] subscribe channel successfully")
+				if msg.Kind == "subscribe" {
+					log.WithFields(log.Fields{
+						"channel": msg.Channel,
+					}).Info("[Subscribe] subscribe channel")
+				} else if msg.Kind == "unsubscribe" {
+					close(subChan)
+					log.WithFields(log.Fields{
+						"channel": msg.Channel,
+					}).Info("[Subscribe] unsubscribe channel")
+				}
 			case redis.Message:
 				log.WithFields(log.Fields{
 					"channel": msg.Channel,
