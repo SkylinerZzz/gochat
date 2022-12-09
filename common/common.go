@@ -13,7 +13,7 @@ type WsClient struct {
 }
 
 var (
-	clientMapMutex sync.Mutex
+	ClientMapMutex sync.Mutex
 	ClientMap      = map[string]*sync.Map{} // store WsClient
 )
 

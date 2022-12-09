@@ -1,8 +1,11 @@
 package service
 
 import (
+	"encoding/json"
+	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
 	"gochat/common"
+	"gochat/modelv2"
 	"gochat/pkg/queue"
 )
 
@@ -66,6 +69,32 @@ func (s *Subscriber) Name() string {
 }
 
 func (s *Subscriber) process(message queue.Message) error {
+	data := modelv2.Message{}
+	wsMessage := common.WsMessage{Data: &data}
+	err := json.Unmarshal([]byte(message.Data), &wsMessage)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"queueName": message.QueueName,
+			"data":      message.Data,
+		}).Errorf("[Subscriber] failed to unmarshal message, err = %s", err)
+		return err
+	}
+
+	//  search local client map
+	v, ok := common.ClientMap[data.RoomId].Load(data.UserId)
+	if !ok {
+		return nil
+	}
+	wsClient := v.(common.WsClient)
+	log.WithFields(log.Fields{
+		"userId": wsClient.UserId,
+		"roomId": wsClient.RoomId,
+	}).Info("[Subscriber] selected to process message")
+	err = wsClient.Conn.WriteMessage(websocket.TextMessage, []byte(message.Data))
+	// record error
+	if err != nil {
+		log.Errorf("[Subscriber] failed to write ws message, err = %s", err)
+	}
 	return nil
 }
 
