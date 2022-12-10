@@ -57,7 +57,6 @@ func (e *Entry) Exec(val ...interface{}) error {
 		return ErrInvalidParams
 	}
 	log.WithFields(log.Fields{
-		"conn":   conn,
 		"roomId": roomId,
 		"userId": userId,
 	}).Info("[Entry] prepare to receive ws message")
