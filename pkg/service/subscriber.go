@@ -7,14 +7,14 @@ import (
 	"gochat/common"
 	"gochat/modelv2"
 	"gochat/pkg/queue"
+	"gochat/util"
 )
 
-type Subscriber struct {
-	queue *queue.Queue
-}
+// Subscriber works in distributed environment
+type Subscriber struct{}
 
 func NewSubscriber(queue *queue.Queue) *Subscriber {
-	return &Subscriber{queue: queue}
+	return &Subscriber{}
 }
 
 func (s *Subscriber) Exec(val ...interface{}) error {
@@ -32,19 +32,13 @@ func (s *Subscriber) Exec(val ...interface{}) error {
 		}).Errorf("[Subscriber] wrong type of parameters")
 		return ErrInvalidParams
 	}
-	if roomId == "" {
-		log.WithFields(log.Fields{
-			"val": val,
-		}).Errorf("[Subscriber] room id can not be empty")
-		return ErrInvalidParams
-	}
 	log.WithFields(log.Fields{
 		"roomId": roomId,
 	}).Info("[Subscriber] subscribing channel of the room")
 
 	// listen channel
 	channel := getChannel(roomId)
-	subChan := s.queue.Subscribe(channel)
+	subChan := util.RedisQueue.Subscribe(channel)
 	go func() {
 		for {
 			select {
