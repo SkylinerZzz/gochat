@@ -71,6 +71,14 @@ func (e *Entry) Exec(val ...interface{}) error {
 		common.ClientMapMutex.Lock()
 		if common.ClientMap[roomId] == nil {
 			common.ClientMap[roomId] = &sync.Map{}
+			sub := NewSubscriber()
+			err := sub.Exec(roomId)
+			if err != nil {
+				log.WithFields(log.Fields{
+					"roomId": roomId,
+				}).Errorf("[Entry] failed to subscribe channel, err = %s", err)
+				return err
+			}
 		}
 		common.ClientMapMutex.Unlock()
 	}

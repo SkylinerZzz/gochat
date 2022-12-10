@@ -13,7 +13,7 @@ import (
 // Subscriber works in distributed environment
 type Subscriber struct{}
 
-func NewSubscriber(queue *queue.Queue) *Subscriber {
+func NewSubscriber() *Subscriber {
 	return &Subscriber{}
 }
 
