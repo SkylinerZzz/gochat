@@ -3,6 +3,7 @@ package util
 import (
 	"fmt"
 	"github.com/gomodule/redigo/redis"
+	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gochat/pkg/queue"
@@ -16,6 +17,7 @@ var (
 	RedisPool  *redis.Pool       // redis connection pool
 	RedisQueue *queue.Queue      // redis message queue
 	DB         *gorm.DB          // mysql handler
+	NodeId     string            // node id
 )
 
 func Init(dir string) {
@@ -23,6 +25,9 @@ func Init(dir string) {
 	initRedis()
 	initQueue()
 	initDB()
+
+	// broadcaster unique identification
+	NodeId = uuid.New().String()
 }
 
 func loadConfig(dir string) {

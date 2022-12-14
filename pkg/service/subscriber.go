@@ -28,7 +28,7 @@ func (s *Subscriber) Exec(val ...interface{}) error {
 	roomId, ok := val[0].(string)
 	if !ok {
 		log.WithFields(log.Fields{
-			"val": val,
+			"val[0]": val[0],
 		}).Errorf("[Subscriber] wrong type of parameters")
 		return ErrInvalidParams
 	}
@@ -74,6 +74,10 @@ func (s *Subscriber) process(message queue.Message) error {
 		return err
 	}
 
+	// only process message from other node
+	if wsMessage.NodeId == util.NodeId {
+		return nil
+	}
 	//  search local client map
 	v, ok := common.ClientMap[data.RoomId].Load(data.UserId)
 	if !ok {

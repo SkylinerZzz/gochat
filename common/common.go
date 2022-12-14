@@ -27,8 +27,9 @@ const (
 
 // WsMessage describe websocket raw data
 type WsMessage struct {
-	Type int         `json:"type"` // WsMessage type
-	Data interface{} `json:"data"` // WsMessage data
+	Type   int         `json:"type"`    // WsMessage type
+	Data   interface{} `json:"data"`    // WsMessage data
+	NodeId string      `json:"node_id"` // WsMessage broadcaster id
 }
 
 const (
