@@ -7,6 +7,7 @@ import (
 	"gochat/pkg/queue"
 	"gochat/util"
 	"sync"
+	"time"
 )
 
 // Entry is in charge of initializing map and sending to dispatcher
@@ -81,7 +82,10 @@ func (e *Entry) Exec(val ...interface{}) error {
 		}
 		common.ClientMapMutex.Unlock()
 	}
+
 	// online
+	checkOldClientClosed(roomId, userId)
+
 	common.ClientMap[roomId].Store(userId, wsClient)
 	rd := util.RedisPool.Get()
 	defer rd.Close()
@@ -149,4 +153,22 @@ func read(ws common.WsClient) {
 
 func getUserListKey(roomId string) string {
 	return common.PREFIX_USER_LIST + roomId
+}
+
+func checkOldClientClosed(roomId, userId string) {
+	// confirm old client has been removed
+	maxTry := 10
+	for curTry := 0; curTry < maxTry; curTry++ {
+		if _, ok := common.ClientMap[roomId].Load(userId); ok {
+			time.Sleep(100 * time.Millisecond)
+		} else {
+			return
+		}
+	}
+	// force remove old client
+	common.ClientMap[roomId].Delete(userId)
+	log.WithFields(log.Fields{
+		"roomId": roomId,
+		"userId": userId,
+	}).Info("[Entry] retry times exceeded, remove old client forcibly")
 }
