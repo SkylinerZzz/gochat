@@ -1,6 +1,9 @@
 package modelv2
 
-import "gorm.io/gorm"
+import (
+	"gochat/util"
+	"gorm.io/gorm"
+)
 
 // Message definition
 type Message struct {
@@ -10,4 +13,12 @@ type Message struct {
 	Content     string `json:"content,omitempty"`
 	ImageUrl    string `json:"image_url,omitempty"`
 	ImageBase64 string `json:"image_base64,omitempty"`
+}
+
+func (Message) TableName() string {
+	return "chat_history"
+}
+
+func SaveMessage(m Message) error {
+	return util.DB.Create(&m).Error
 }

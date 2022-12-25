@@ -65,7 +65,6 @@ func (b *Broadcaster) Exec(val ...interface{}) error {
 		return err
 	}
 
-	wsMessage.NodeId = util.NodeId
 	data, err := json.Marshal(wsMessage)
 	if err != nil {
 		log.WithFields(log.Fields{

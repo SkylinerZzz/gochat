@@ -73,11 +73,7 @@ func (s *Subscriber) process(message queue.Message) error {
 		}).Errorf("[Subscriber] failed to unmarshal message, err = %s", err)
 		return err
 	}
-
-	// only process message from other node
-	if wsMessage.NodeId == util.NodeId {
-		return nil
-	}
+	
 	//  search local client map
 	v, ok := common.ClientMap[data.RoomId].Load(data.UserId)
 	if !ok {
