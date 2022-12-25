@@ -11,8 +11,15 @@ import (
 	"time"
 )
 
+// ContentHandler is in charge of saving and broadcasting content message
 type ContentHandler struct {
 	queue *queue.Queue
+}
+
+func NewContentHandler(queue *queue.Queue) *ContentHandler {
+	return &ContentHandler{
+		queue: queue,
+	}
 }
 
 func (ch *ContentHandler) Run(message queue.Message) (info adapter.QueueTaskInfo, status adapter.QueueTaskStatus, err error) {
