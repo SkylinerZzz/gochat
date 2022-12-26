@@ -2,20 +2,37 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/gin-gonic/gin"
+	"gochat/common"
 	_ "gochat/model"
+	"gochat/pkg/adapter"
+	"gochat/pkg/task"
 	"gochat/router"
+	"gochat/util"
 	"strconv"
+	"time"
 )
 
 var port = flag.Int("port", 8080, "port")
 
 func main() {
+	// allocate port
 	flag.Parse()
 	addr := ":" + strconv.Itoa(*port)
-	fmt.Println(addr)
+
+	// init server
+	util.Init("./config")
+
+	// start queue task
+	dispatcher := task.NewDispatcher(util.RedisQueue)
+	dispatcherAdapter := adapter.NewQueueTaskAdapter(dispatcher, util.RedisQueue, common.DATABUS_DISPATCHER, 3*time.Second, 100, adapter.NewLogger())
+	go dispatcherAdapter.Start()
+	contentHandler := task.NewContentHandler(util.RedisQueue)
+	contentHandlerAdapter := adapter.NewQueueTaskAdapter(contentHandler, util.RedisQueue, common.DATABUS_CONTENT_HANDLER, 3*time.Second, 100, adapter.NewLogger())
+	go contentHandlerAdapter.Start()
+
+	// init router
 	r := gin.Default()
-	r = router.InitRouter(r)
+	r = router.Init(r)
 	r.Run(addr)
 }

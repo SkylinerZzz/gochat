@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"gochat/common"
 	"gochat/modelv2"
+	"gochat/util"
 	"testing"
 )
 
 func TestSub(t *testing.T) {
+	util.Init("../../config")
 	data := modelv2.Message{}
 	wsMessage := common.WsMessage{Data: &data}
 	raw := `
@@ -26,4 +28,6 @@ func TestSub(t *testing.T) {
 		t.Fatal(err)
 	}
 	fmt.Println(wsMessage, data)
+	sub := NewSubscriber()
+	sub.Exec("1")
 }

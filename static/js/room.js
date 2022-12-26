@@ -1,19 +1,20 @@
 var ws=null;
-var uri="ws://localhost/room/ws" // reverse proxy
+//var uri="ws://localhost/room/ws" // reverse proxy
 // var uri="ws://localhost:8080/room/ws"
 var userId,username,roomId;
 function wsConnect(){
     userId=document.getElementById("userId").value;
     username=document.getElementById("username").value;
     roomId=document.getElementById("roomId").value;
+    let uri="ws://localhost:8080/room/ws"+"?room_id="+roomId+"&user_id="+userId;
     ws=new WebSocket(uri);
     ws.onopen=function (){
         console.log("connected to "+uri+" at "+Date());
         let msg=JSON.stringify({
-            "msgType":1,
+            "type":0,
             "data":{
-                "username":username,
-                "roomId":roomId
+                "room_id":roomId,
+                "user_id":userId
             }
         });
         ws.send(msg);
@@ -24,18 +25,18 @@ function wsConnect(){
     ws.onmessage=function (e){
         console.log("message received: "+e.data);
         let msg=JSON.parse(e.data);
-        console.log("message type",msg.msgType);
+        console.log("message type",msg.type);
         let data=msg.data;
-        switch (msg.msgType){
-            case 1: // msgTypeOnline
-                let v=data.username+" enters into the room "+data.roomId;
+        switch (msg.type){
+            case 0: // msgTypeOnline
+                let v=data.user_id+" enters into the room "+data.room_id;
                 $("#messageArea").append('<li class="public">'+v+'</li>');
                 break;
-            case 2:
-                let msgHead='<span class="head">'+data.username+'(room '+data.roomId+'):'+'</span><br>';
+            case 1:
+                let msgHead='<span class="head">'+data.user_id+'(room '+data.room_id+'):'+'</span><br>';
                 let msgBody='<span class="body">'+data.content+'</span>';
                 let msgItem;
-                if(username==data.username){ // sender
+                if(userId==data.user_id){ // sender
                     msgItem=$('<li class="send"/>').append(msgHead,msgBody);
                 }else{ // receiver
                     msgItem=$('<li class="receive"/>').append(msgHead,msgBody);
@@ -49,10 +50,10 @@ function wsConnect(){
 }
 function wsClose(){
     let msg=JSON.stringify({
-        "msgType":3,
+        "type":3,
         "data":{
-            "username":username,
-            "roomId":roomId
+            "user_id":username,
+            "room_id":roomId
         }
     });
     ws.send(msg);
@@ -63,10 +64,10 @@ function sendMsg(){
     $("#inputArea").val("");
     $("#sendBtn").attr("disabled",true);
     let msg=JSON.stringify({
-        "msgType":2,
+        "type":1,
         "data":{
-            "userId":userId,
-            "roomId":roomId,
+            "user_id":userId,
+            "room_id":roomId,
             "content":content
         }
     });

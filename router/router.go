@@ -6,7 +6,7 @@ import (
 	"gochat/session"
 )
 
-func InitRouter(r *gin.Engine) *gin.Engine {
+func Init(r *gin.Engine) *gin.Engine {
 	r.LoadHTMLGlob("view/*")
 	r.Static("/static", "./static")
 	r.StaticFile("/favicon.ico", "./static/icon/favicon.ico")
@@ -20,7 +20,7 @@ func InitRouter(r *gin.Engine) *gin.Engine {
 		sr.GET("/home/new", controller.NewPage) // create new room
 		sr.POST("/home/new", controller.New)
 		sr.GET("/room/:roomId", controller.Enter) // enter into the room
-		sr.GET("/room/ws", controller.Run)        // build websocket connection
+		sr.GET("/room/ws", controller.WsCreate)   // build websocket connection
 	}
 	return r
 }

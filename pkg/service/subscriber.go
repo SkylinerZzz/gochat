@@ -19,6 +19,7 @@ func NewSubscriber() *Subscriber {
 
 func (s *Subscriber) Exec(val ...interface{}) error {
 	// parameter verification
+	// val[0]: room id
 	if len(val) != 1 {
 		log.WithFields(log.Fields{
 			"val": val,
@@ -73,7 +74,7 @@ func (s *Subscriber) process(message queue.Message) error {
 		}).Errorf("[Subscriber] failed to unmarshal message, err = %s", err)
 		return err
 	}
-	
+
 	//  search local client map
 	v, ok := common.ClientMap[data.RoomId].Load(data.UserId)
 	if !ok {
