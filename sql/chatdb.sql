@@ -41,8 +41,7 @@ create table chat_history(
    user_id varchar(32) not null,
    room_id varchar(32) not null,
    content longtext,
-   image_url varchar(100),
-   image_base64 longtext,
+   image_id varchar(64),
    primary key (id),
    index idx_chat_history_room_id(room_id)
 );

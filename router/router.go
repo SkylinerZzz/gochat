@@ -3,7 +3,7 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	"gochat/controller"
-	"gochat/session"
+	"gochat/controller/session"
 )
 
 func Init(r *gin.Engine) *gin.Engine {
@@ -16,11 +16,11 @@ func Init(r *gin.Engine) *gin.Engine {
 		sr.POST("/login", controller.Login)
 		sr.GET("/register", controller.RegisterPage)
 		sr.POST("/register", controller.Register)
-		sr.GET("/home", controller.Index)
-		sr.GET("/home/new", controller.NewPage) // create new room
-		sr.POST("/home/new", controller.New)
-		sr.GET("/room/:roomId", controller.Enter) // enter into the room
-		sr.GET("/room/ws", controller.WsCreate)   // build websocket connection
+		sr.GET("/home", controller.IndexPage)
+		sr.GET("/home/new", controller.NewRoomPage) // create new room
+		sr.POST("/home/new", controller.NewRoom)
+		sr.GET("/room/:roomId", controller.RoomPage) // enter into the room
+		sr.GET("/room/ws", controller.WsCreate)      // build websocket connection
 	}
 	return r
 }

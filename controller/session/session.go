@@ -1,0 +1,31 @@
+package session
+
+import (
+	"encoding/gob"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
+	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
+)
+
+func EnableSession() gin.HandlerFunc {
+	store := cookie.NewStore([]byte("SkylinerZzz"))
+	// register map[string]interface{}
+	gob.Register(map[string]interface{}{})
+	return sessions.Sessions("UserInfo", store)
+}
+
+func SetSession(c *gin.Context, info map[string]interface{}) {
+	s := sessions.Default(c)
+	s.Set("UserInfo", info)
+	err := s.Save()
+	if err != nil {
+		log.Errorf("session: failed to save user info, err = %s", err)
+	}
+}
+
+func GetSession(c *gin.Context) map[string]interface{} {
+	s := sessions.Default(c)
+	info := s.Get("UserInfo").(map[string]interface{})
+	return info
+}

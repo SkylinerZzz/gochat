@@ -14,9 +14,11 @@ function wsConnect(){
             "type":0,
             "data":{
                 "room_id":roomId,
-                "user_id":userId
+                "user_id":userId,
+                "username":username
             }
         });
+        console.log(msg)
         ws.send(msg);
     }
     ws.onclose=function (e){
@@ -29,11 +31,11 @@ function wsConnect(){
         let data=msg.data;
         switch (msg.type){
             case 0: // msgTypeOnline
-                let v=data.user_id+" enters into the room "+data.room_id;
+                let v=data.username+" enters into the room "+data.room_id;
                 $("#messageArea").append('<li class="public">'+v+'</li>');
                 break;
             case 1:
-                let msgHead='<span class="head">'+data.user_id+'(room '+data.room_id+'):'+'</span><br>';
+                let msgHead='<span class="head">'+data.username+'(room '+data.room_id+'):'+'</span><br>';
                 let msgBody='<span class="body">'+data.content+'</span>';
                 let msgItem;
                 if(userId==data.user_id){ // sender
@@ -53,7 +55,8 @@ function wsClose(){
         "type":3,
         "data":{
             "user_id":username,
-            "room_id":roomId
+            "room_id":roomId,
+            "username":username
         }
     });
     ws.send(msg);
@@ -67,6 +70,7 @@ function sendMsg(){
         "type":1,
         "data":{
             "user_id":userId,
+            "username":username,
             "room_id":roomId,
             "content":content
         }
