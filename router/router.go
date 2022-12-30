@@ -14,8 +14,8 @@ func Init(r *gin.Engine) *gin.Engine {
 	{
 		sr.GET("/login", controller.LoginPage)
 		sr.POST("/login", controller.Login)
-		sr.GET("/register", controller.RegisterPage)
-		sr.POST("/register", controller.Register)
+		sr.GET("/register", controller.SignupPage)
+		sr.POST("/register", controller.Signup)
 		sr.GET("/home", controller.IndexPage)
 		sr.GET("/home/new", controller.NewRoomPage) // create new room
 		sr.POST("/home/new", controller.NewRoom)
