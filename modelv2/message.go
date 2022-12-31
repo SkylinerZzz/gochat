@@ -12,11 +12,16 @@ type Message struct {
 	Username   string `json:"username" validate:"required" gorm:"-"`
 	RoomId     string `json:"room_id" validate:"required"`
 	Content    string `json:"content,omitempty"`
-	ImageId    string `json:"image_id,omitempty"`
+	ImageUrl   string `json:"image_url,omitempty"`
 }
 
 func (Message) TableName() string {
 	return "chat_history"
+}
+
+// Validate return nil if validation passed, or return err
+func (m Message) Validate() error {
+	return validate.Struct(m)
 }
 
 func SaveMessage(m Message) error {

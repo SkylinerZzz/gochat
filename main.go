@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"github.com/gin-gonic/gin"
 	"gochat/common"
 	_ "gochat/model"
 	"gochat/pkg/adapter"
@@ -32,7 +31,6 @@ func main() {
 	go contentHandlerAdapter.Start()
 
 	// init router
-	r := gin.Default()
-	r = router.Init(r)
+	r := router.Init()
 	r.Run(addr)
 }

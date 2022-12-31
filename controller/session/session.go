@@ -26,6 +26,19 @@ func SetSession(c *gin.Context, info map[string]interface{}) {
 
 func GetSession(c *gin.Context) map[string]interface{} {
 	s := sessions.Default(c)
-	info := s.Get("UserInfo").(map[string]interface{})
+	v := s.Get("UserInfo")
+	if v == nil {
+		return nil
+	}
+	info := v.(map[string]interface{})
 	return info
+}
+
+func DelSession(c *gin.Context) {
+	s := sessions.Default(c)
+	s.Clear()
+	err := s.Save()
+	if err != nil {
+		log.Errorf("session: failed to delete user info, err = %s", err)
+	}
 }

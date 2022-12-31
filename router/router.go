@@ -6,16 +6,20 @@ import (
 	"gochat/controller/session"
 )
 
-func Init(r *gin.Engine) *gin.Engine {
+func Init() *gin.Engine {
+	r := gin.Default()
+
 	r.LoadHTMLGlob("view/*")
 	r.Static("/static", "./static")
 	r.StaticFile("/favicon.ico", "./static/icon/favicon.ico")
+
 	sr := r.Group("/", session.EnableSession())
 	{
 		sr.GET("/login", controller.LoginPage)
 		sr.POST("/login", controller.Login)
 		sr.GET("/register", controller.SignupPage)
 		sr.POST("/register", controller.Signup)
+		sr.POST("/logout", controller.Logout)
 		sr.GET("/home", controller.IndexPage)
 		sr.GET("/home/new", controller.NewRoomPage) // create new room
 		sr.POST("/home/new", controller.NewRoom)

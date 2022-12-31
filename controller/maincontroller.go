@@ -12,6 +12,11 @@ import (
 
 // LoginPage is responsible for displaying login page
 func LoginPage(c *gin.Context) {
+	// user has logged in recently
+	if session.GetSession(c) != nil {
+		c.Redirect(http.StatusMovedPermanently, "/home")
+		return
+	}
 	c.HTML(http.StatusOK, "login.html", nil)
 }
 
@@ -71,12 +76,12 @@ func Signup(c *gin.Context) {
 		log.Errorf("[Register] failed to parse form, err = %s", err)
 		return
 	}
-	// validate input
 	log.WithFields(log.Fields{
 		"username": u.Username,
 		"password": u.Password,
 	}).Info("someone trying to sign up")
 
+	// validate input
 	namePattern := "^[a-zA-Z0-9_-]{4,20}$"
 	pwdPattern := "^[a-zA-Z0-9]{6,20}$"
 	if m, _ := regexp.MatchString(namePattern, u.Username); !m {
@@ -111,10 +116,20 @@ func Signup(c *gin.Context) {
 	}
 }
 
+// Logout clears previous userinfo session
+func Logout(c *gin.Context) {
+	session.DelSession(c)
+	c.Redirect(http.StatusMovedPermanently, "/login")
+}
+
 // IndexPage is responsible for displaying index page
 func IndexPage(c *gin.Context) {
 	// get user info from session
 	user := session.GetSession(c)
+	if user == nil || (user["user_id"] == "" || user["username"] == "") {
+		c.Redirect(http.StatusMovedPermanently, "/login")
+		return
+	}
 	log.WithFields(log.Fields{
 		"userId":   user["user_id"],
 		"username": user["username"],
