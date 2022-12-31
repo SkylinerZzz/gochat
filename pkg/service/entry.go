@@ -112,6 +112,10 @@ func read(ws common.WsClient) {
 	for {
 		t, data, err := ws.Conn.ReadMessage()
 		if err != nil {
+			if err.Error() == ErrWsConnClosed.Error() {
+				log.Info("[Entry] websocket connection closed")
+				return
+			}
 			log.Errorf("[Entry] failed to receive ws message, err = %s", err)
 			return
 		}
