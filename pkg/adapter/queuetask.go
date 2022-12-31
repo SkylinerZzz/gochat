@@ -65,6 +65,12 @@ func (adapter *QueueTaskAdapter) Start() {
 func (adapter *QueueTaskAdapter) Terminate() {
 	adapter.cancel()
 	adapter.pool.Release()
+
+	// print logger info
+	logger, ok := adapter.handler.(*Logger)
+	if ok {
+		logger.Log()
+	}
 }
 
 // process message once

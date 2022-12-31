@@ -6,13 +6,14 @@ import (
 )
 
 type Logger struct {
-	success int // task completion count
-	failure int // task incomplete count
-	slow    int // task timeout count
+	success int    // task completion count
+	failure int    // task incomplete count
+	slow    int    // task timeout count
+	name    string // corresponding queue task name
 }
 
-func NewLogger() *Logger {
-	return &Logger{}
+func NewLogger(name string) *Logger {
+	return &Logger{name: name}
 }
 
 func (l *Logger) Handle(info QueueTaskInfo, status QueueTaskStatus, err error) {
@@ -42,13 +43,15 @@ func (l *Logger) Handle(info QueueTaskInfo, status QueueTaskStatus, err error) {
 }
 
 func (l *Logger) Name() string {
-	return "Logger"
+	return l.name
 }
 
 func (l *Logger) Log() {
 	rate := float32(l.success) / float32(l.success+l.failure+l.slow) * 100
-	fmt.Printf("the number of successful task: %d\n"+
+	fmt.Println("------------------------------------------------------------")
+	fmt.Printf("the number of successful %s task: %d\n"+
 		"the number of failed task: %d\n"+
 		"the number of slow task: %d\n"+
-		"success rate: %.1f%%\n", l.success, l.failure, l.slow, rate)
+		"success rate: %.1f%%\n", l.name, l.success, l.failure, l.slow, rate)
+	fmt.Println("------------------------------------------------------------")
 }

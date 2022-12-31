@@ -65,7 +65,7 @@ func TestAdapter(t *testing.T) {
 		}
 	}()
 
-	logger := adapter.NewLogger()
+	logger := adapter.NewLogger("test")
 	adapter := adapter.NewQueueTaskAdapter(task, util.RedisQueue, queueName, 1*time.Second, 100, logger)
 	go adapter.Start()
 	time.Sleep(20 * time.Second)
