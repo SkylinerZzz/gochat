@@ -8,6 +8,7 @@ import (
 	"gochat/pkg/adapter"
 	"gochat/pkg/queue"
 	"gochat/pkg/service"
+	"gochat/util"
 	"time"
 )
 
@@ -111,5 +112,31 @@ func (d *Dispatcher) processImage(data string) error {
 
 // process offline type of WsMessage
 func (d *Dispatcher) processOffline(data string) error {
+	message := modelv2.Message{}
+	wsMessage := common.WsMessage{Data: &message}
+	err := json.Unmarshal([]byte(data), &wsMessage)
+	if err != nil {
+		return err
+	}
+	log.WithFields(log.Fields{
+		"roomId": message.RoomId,
+		"userId": message.UserId,
+	}).Info("[Dispatcher] process offline message")
+
+	common.ClientMap[message.RoomId].Delete(message.UserId)
+	rd := util.RedisPool.Get()
+	_, err = rd.Do("hset", getUserListKey(message.RoomId), message.UserId, common.UserStatusOffline)
+	rd.Close()
+	if err != nil {
+		log.WithFields(log.Fields{
+			"roomId": message.RoomId,
+			"userId": message.UserId,
+		}).Errorf("[Entry] failed to set user offline status, err = %s", err)
+		return err
+	}
 	return nil
+}
+
+func getUserListKey(roomId string) string {
+	return common.PREFIX_USER_LIST + roomId
 }

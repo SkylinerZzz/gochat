@@ -54,7 +54,7 @@ function wsClose(){
     let msg=JSON.stringify({
         "type":3,
         "data":{
-            "user_id":username,
+            "user_id":userId,
             "room_id":roomId,
             "username":username
         }

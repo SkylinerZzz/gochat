@@ -9,8 +9,8 @@ import (
 func Init() *gin.Engine {
 	r := gin.Default()
 
-	r.LoadHTMLGlob("view/*")
-	r.Static("/static", "./static")
+	r.LoadHTMLGlob("view/template/*")
+	r.Static("/view/static", "./view/static")
 	r.StaticFile("/favicon.ico", "./static/icon/favicon.ico")
 
 	sr := r.Group("/", session.EnableSession())

@@ -118,17 +118,7 @@ func read(ws common.WsClient) {
 		switch t {
 		// offline
 		case websocket.CloseMessage:
-			common.ClientMap[ws.RoomId].Delete(ws.UserId)
-			rd := util.RedisPool.Get()
-			_, err := rd.Do("hset", getUserListKey(ws.RoomId), ws.UserId, common.UserStatusOffline)
-			rd.Close()
-			if err != nil {
-				log.WithFields(log.Fields{
-					"roomId": ws.RoomId,
-					"userId": ws.UserId,
-				}).Errorf("[Entry] failed to set user offline status, err = %s", err)
-				return
-			}
+			// pass
 			return
 		default:
 			message := queue.Message{
