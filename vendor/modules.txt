@@ -43,9 +43,6 @@ github.com/goccy/go-json/internal/runtime
 ## explicit
 github.com/gomodule/redigo/internal
 github.com/gomodule/redigo/redis
-# github.com/google/uuid v1.3.0
-## explicit
-github.com/google/uuid
 # github.com/gorilla/context v1.1.1
 ## explicit
 github.com/gorilla/context

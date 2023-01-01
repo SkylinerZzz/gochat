@@ -5,8 +5,8 @@ go 1.18
 require (
 	github.com/gin-contrib/sessions v0.0.5
 	github.com/gin-gonic/gin v1.8.1
+	github.com/go-playground/validator/v10 v10.11.0
 	github.com/gomodule/redigo v2.0.0+incompatible
-	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/panjf2000/ants/v2 v2.6.0
 	github.com/sirupsen/logrus v1.9.0
@@ -20,7 +20,6 @@ require (
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
-	github.com/go-playground/validator/v10 v10.11.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/goccy/go-json v0.9.11 // indirect
 	github.com/gorilla/context v1.1.1 // indirect

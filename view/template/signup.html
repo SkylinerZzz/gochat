@@ -2,29 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Log In | GoChat</title>
+    <title>Sign Up | GoChat</title>
     <link href="/view/bootstrap-5.3.0-alpha1-dist/css/bootstrap.css" rel="stylesheet">
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.js" type="text/javascript" charset="utf-8"></script>
     <script src="/view/bootstrap-5.3.0-alpha1-dist/js/bootstrap.bundle.js"></script>
 </head>
 <body>
 <div class="container p-3 my-5 border" style="width: 25%">
-    <h4 class="text-center">Welcome to GoChat</h4>
-    <form action="/login" method="post">
+    <h4 class="text-center">Join us</h4>
+    <form action="/signup" method="post">
         <div class="form-floating mb-3 mt-3">
             <input type="text" class="form-control" id="username" placeholder="Username" name="username">
             <label for="username">Username</label>
         </div>
-        <div class="form-floating mb-0">
+        <div class="form-floating mb-3">
             <input type="password" class="form-control" id="password" placeholder="Password" name="password">
             <label for="password">Password</label>
         </div>
-        <div class="mb-3 text-end">
-            <a href="/account-recovery" style="font-size: xx-small">Forgot password?</a>
-        </div>
-        <div class="d-grid gap-2">
-            <button type="submit" class="btn btn-primary">Log in</button>
-            <a href="/signup" class="btn btn-secondary">Sign up</a>
+        <div class="d-grid">
+            <button type="submit" class="btn btn-primary">Sign up</button>
         </div>
     </form>
 </div>

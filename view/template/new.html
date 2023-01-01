@@ -5,8 +5,10 @@
     <title>New_GoChat</title>
 </head>
 <body>
-<form action="/home/new" method="post">
+<form action="/index/new" method="post">
     <div style="text-align: center">
+        <input type="hidden" id="userId" name="userId" value="{{.userId}}">
+        <input type="hidden" id="username" name="username" value="{{.username}}">
         <input type="text" name="room_name" placeholder="please input room name">
         <button type="submit" >create</button>
     </div>

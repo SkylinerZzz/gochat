@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"gochat/controller/session"
-	"gochat/model"
 	"gochat/modelv2"
 	"net/http"
 	"regexp"
@@ -14,7 +13,8 @@ import (
 func LoginPage(c *gin.Context) {
 	// user has logged in recently
 	if session.GetSession(c) != nil {
-		c.Redirect(http.StatusMovedPermanently, "/home")
+		log.Info("?")
+		c.Redirect(http.StatusFound, "/index")
 		return
 	}
 	c.HTML(http.StatusOK, "login.html", nil)
@@ -54,7 +54,7 @@ func Login(c *gin.Context) {
 		// login succeeded
 		// store session
 		session.SetSession(c, map[string]interface{}{"user_id": user.ID, "username": user.Username})
-		c.Redirect(http.StatusMovedPermanently, "/home")
+		c.Redirect(http.StatusFound, "/index")
 		return
 	} else {
 		// login failed
@@ -66,7 +66,7 @@ func Login(c *gin.Context) {
 
 // SignupPage is responsible for displaying login page
 func SignupPage(c *gin.Context) {
-	c.HTML(http.StatusOK, "register.html", nil)
+	c.HTML(http.StatusOK, "signup.html", nil)
 }
 
 // Signup validates user info format
@@ -86,12 +86,12 @@ func Signup(c *gin.Context) {
 	pwdPattern := "^[a-zA-Z0-9]{6,20}$"
 	if m, _ := regexp.MatchString(namePattern, u.Username); !m {
 		c.Writer.Write([]byte("<script>alert('invalid username')</script>"))
-		c.HTML(http.StatusOK, "register.html", nil)
+		c.HTML(http.StatusOK, "signup.html", nil)
 		return
 	}
 	if m, _ := regexp.MatchString(pwdPattern, u.Password); !m {
 		c.Writer.Write([]byte("<script>alert('invalid password')</script>"))
-		c.HTML(http.StatusOK, "register.html", nil)
+		c.HTML(http.StatusOK, "signup.html", nil)
 		return
 	}
 
@@ -103,7 +103,7 @@ func Signup(c *gin.Context) {
 		// user exists
 		log.Info("username already exists")
 		c.Writer.Write([]byte("<script>alert('username already exists')</script>"))
-		c.HTML(http.StatusOK, "register.html", nil)
+		c.HTML(http.StatusOK, "signup.html", nil)
 		return
 	} else {
 		// sign up succeeded
@@ -111,7 +111,7 @@ func Signup(c *gin.Context) {
 		if err != nil {
 			log.Errorf("[Signup] failed to add user, err = %s", err)
 		}
-		c.Redirect(http.StatusMovedPermanently, "/login")
+		c.Redirect(http.StatusFound, "/login")
 		return
 	}
 }
@@ -119,7 +119,7 @@ func Signup(c *gin.Context) {
 // Logout clears previous userinfo session
 func Logout(c *gin.Context) {
 	session.DelSession(c)
-	c.Redirect(http.StatusMovedPermanently, "/login")
+	c.Redirect(http.StatusFound, "/login")
 }
 
 // IndexPage is responsible for displaying index page
@@ -127,7 +127,7 @@ func IndexPage(c *gin.Context) {
 	// get user info from session
 	user := session.GetSession(c)
 	if user == nil || (user["user_id"] == "" || user["username"] == "") {
-		c.Redirect(http.StatusMovedPermanently, "/login")
+		c.Redirect(http.StatusFound, "/login")
 		return
 	}
 	log.WithFields(log.Fields{
@@ -135,13 +135,20 @@ func IndexPage(c *gin.Context) {
 		"username": user["username"],
 	}).Info("welcome to home")
 
-	rs := model.ListAllRooms()
-	c.HTML(http.StatusOK, "home.html", rs)
+	c.HTML(http.StatusOK, "index.html", gin.H{"username": user["username"]})
 }
 
 // NewRoomPage is responsible for displaying new room page
 func NewRoomPage(c *gin.Context) {
-	c.HTML(http.StatusOK, "new.html", nil)
+	user := session.GetSession(c)
+	if user == nil || (user["user_id"] == "" || user["username"] == "") {
+		c.Redirect(http.StatusFound, "/login")
+		return
+	}
+	c.HTML(http.StatusOK, "new.html", gin.H{
+		"userId":   user["user_id"],
+		"username": user["username"],
+	})
 }
 
 // NewRoom creates new room
@@ -168,7 +175,7 @@ func NewRoom(c *gin.Context) {
 		log.Errorf("[NewRoom] failed to add room, err = %s", err)
 	}
 	log.Info(user["username"], " create a new room")
-	c.Redirect(http.StatusMovedPermanently, "/home")
+	c.Redirect(http.StatusFound, "/index")
 }
 
 // RoomPage is responsible for displaying room page

@@ -53,6 +53,7 @@ type RoomInfo struct {
 	gorm.Model
 	RoomName string `form:"room_name"` // room name
 	UserId   string `form:"user_id"`   // owner id
+	Username string `form:"username"`  // owner name
 }
 
 func (RoomInfo) TableName() string {
