@@ -24,6 +24,7 @@ func Init() *gin.Engine {
 		sr.GET("/index", controller.IndexPage)
 		sr.GET("/index/new", controller.NewRoomPage) // create new room
 		sr.POST("/index/new", controller.NewRoom)
+		sr.POST("/index/search", controller.Search)
 		sr.GET("/room/:roomId", controller.RoomPage) // enter into the room
 		sr.GET("/room/ws", controller.WsCreate)      // build websocket connection
 	}

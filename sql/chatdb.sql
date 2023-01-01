@@ -64,6 +64,7 @@ create table room_info(
   deleted_at datetime(3) null ,
   room_name varchar(20) not null,
   user_id varchar(32) not null,
+  username varchar(20) not null,
   primary key (id),
   index idx_room_info_room_name(room_name)
 );

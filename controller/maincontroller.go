@@ -178,6 +178,18 @@ func NewRoom(c *gin.Context) {
 	c.Redirect(http.StatusFound, "/index")
 }
 
+// Search lists rooms by name
+func Search(c *gin.Context) {
+	roomName := c.PostForm("room_name")
+	rooms, err := modelv2.FindRoomsByName(roomName)
+	if err != nil {
+		log.Errorf("[Search] failed to find rooms by name, err = %s", err)
+		c.JSON(http.StatusServiceUnavailable, nil)
+	}
+
+	c.JSON(http.StatusOK, rooms)
+}
+
 // RoomPage is responsible for displaying room page
 func RoomPage(c *gin.Context) {
 	user := session.GetSession(c)

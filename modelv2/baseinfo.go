@@ -51,9 +51,9 @@ func CheckUserExists(username string) (bool, error) {
 // RoomInfo describes room info while creating new room
 type RoomInfo struct {
 	gorm.Model
-	RoomName string `form:"room_name"` // room name
-	UserId   string `form:"user_id"`   // owner id
-	Username string `form:"username"`  // owner name
+	RoomName string `json:"room_name" form:"room_name"` // room name
+	UserId   string `json:"user_id" form:"user_id"`     // owner id
+	Username string `json:"username" form:"username"`   // owner name
 }
 
 func (RoomInfo) TableName() string {
