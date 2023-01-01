@@ -24,23 +24,20 @@
         </div>
     </div>
 </nav>
+<div class="container" style="width: 50%" id="alertDock">
+    <!--
+    <div class="alert alert-danger alert-dismissible fade show">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <strong>Room does not exist</strong>
+    </div>
+    -->
+</div>
 <div class="container mt-3 mb-3" style="width: 50%">
     <div class="input-group mb-3">
         <input type="text" class="form-control" id="room_name" placeholder="Search">
         <button class="btn btn-primary" onclick="search()">Go</button>
     </div>
     <div class="list-group overflow-y-auto border" style="height: 400px;" id="searchResult">
-        {{range .}}
-        <a href="/room/{{.ID}}" class="list-group-item list-group-item-action d-flex gap-3 py-3" id="{{.ID}}">
-            <div class="d-flex gap-2 w-100 justify-content-between">
-                <div>
-                    <h5 class="mb-0">{{.RoomName}}</h5>
-                    <p class="mb-0 opacity-75">{{.UserName}}</p>
-                </div>
-                <small class="opacity-50 text-nowrap">{{.CreatedAt}}</small>
-            </div>
-        </a>
-        {{end}}
     </div>
 </div>
 </body>

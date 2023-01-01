@@ -13,7 +13,19 @@ function search(){
 }
 
 function processData(data){
+    $("#searchResult").empty();
     let len=data.length;
+    if (len==0){
+        $("#btnCloseAlert").click();
+        $("#alertDock").append(
+            `<div class="alert alert-danger alert-dismissible fade show">
+                <button type="button" class="btn-close" data-bs-dismiss="alert" id="btnCloseAlert"></button>
+                <strong>Room does not exist</strong>
+            </div>`
+        );
+        window.setTimeout("closeAlert()",3000)
+    }
+
     for (let i=0;i<len;i++){
         let roomId=data[i]["ID"];
         let roomName=data[i]["room_name"];
@@ -30,4 +42,8 @@ function processData(data){
         let div2=$('<a href='+href+' class="list-group-item list-group-item-action d-flex gap-3 py-3">').append(div1)
         $("#searchResult").append(div2)
     }
+}
+
+function closeAlert(){
+    $("#btnCloseAlert").click();
 }
