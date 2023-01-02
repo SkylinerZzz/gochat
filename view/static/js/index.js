@@ -3,6 +3,7 @@ function search(){
     let xmlHttp=new XMLHttpRequest();
     xmlHttp.onreadystatechange=function (){
         if(xmlHttp.readyState==4&&xmlHttp.status==200){
+            console.log(this.responseText);
             let data=JSON.parse(this.responseText);
             processData(data);
         }

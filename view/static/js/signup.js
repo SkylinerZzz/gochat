@@ -4,8 +4,14 @@ function signup(){
     let xmlHttp=new XMLHttpRequest();
     xmlHttp.onreadystatechange=function (){
         if(xmlHttp.readyState==4&&xmlHttp.status==200){
+            console.log(this.responseText);
             let data=JSON.parse(this.responseText);
-            processData(data);
+            if (data["msg"]=="success"){
+                console.log("good");
+                window.location.href="/login";
+            }else{
+                processData(data);
+            }
         }
         if (xmlHttp.readyState==4&&xmlHttp.status==503){
             alertError();

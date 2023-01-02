@@ -1,20 +1,25 @@
 function login(){
     let username=document.getElementById("username").value;
     let password=document.getElementById("password").value;
-    let xmlHttp=new XMLHttpRequest();
-    xmlHttp.onreadystatechange=function (){
-        if(xmlHttp.readyState==4&&xmlHttp.status==200){
+    let postRequest=new XMLHttpRequest();
+    postRequest.onreadystatechange=function (){
+        if(postRequest.readyState==4&&postRequest.status==200){
             console.log(this.responseText);
             let data=JSON.parse(this.responseText);
-            processData(data);
+            if (data["msg"]=="success"){
+                console.log("good");
+                window.location.href="/index";
+            }else{
+                processData(data);
+            }
         }
-        if (xmlHttp.readyState==4&&xmlHttp.status==503){
+        if (postRequest.readyState==4&&postRequest.status==503){
             alertError();
         }
     }
-    xmlHttp.open("POST","/login");
-    xmlHttp.setRequestHeader("Content-Type","application/json");
-    xmlHttp.send(JSON.stringify({
+    postRequest.open("POST","/login");
+    postRequest.setRequestHeader("Content-Type","application/json");
+    postRequest.send(JSON.stringify({
         "username":username,
         "password":password
     }));

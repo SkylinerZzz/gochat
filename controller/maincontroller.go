@@ -58,7 +58,8 @@ func Login(c *gin.Context) {
 		// login succeeded
 		// store session
 		session.SetSession(c, map[string]interface{}{"user_id": user.ID, "username": user.Username})
-		c.Redirect(http.StatusFound, "/index")
+		//c.Redirect(http.StatusFound, "/index")
+		c.JSON(http.StatusOK, gin.H{"msg": "success"})
 		return
 	} else {
 		// login failed
@@ -124,7 +125,8 @@ func Signup(c *gin.Context) {
 			c.JSON(http.StatusServiceUnavailable, nil)
 			return
 		}
-		c.Redirect(http.StatusFound, "/login")
+		//c.Redirect(http.StatusFound, "/login")
+		c.JSON(http.StatusOK, gin.H{"msg": "success"})
 		return
 	}
 }
@@ -193,7 +195,8 @@ func NewRoom(c *gin.Context) {
 	}
 
 	log.Info(user["username"], " create a new room")
-	c.Redirect(http.StatusFound, "/index")
+	//c.Redirect(http.StatusFound, "/index")
+	c.JSON(http.StatusOK, gin.H{"msg": "success"})
 }
 
 // Search lists rooms by name
