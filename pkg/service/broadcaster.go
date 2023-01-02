@@ -79,10 +79,31 @@ func (b *Broadcaster) Exec(val ...interface{}) error {
 		}
 		// search local client map
 		v, ok := common.ClientMap[roomId].Load(userId)
+		common.ClientMap[roomId].Range(func(key any, value any) bool {
+			log.WithFields(log.Fields{
+				"userId": userId,
+			}).Infof("[Debug] ??%v", key)
+			return false
+		})
 		if !ok {
 			// publish ws message to let other server handle this message that has corresponding client map
+			// fill PubSubMessage
+			pub := common.PubSubMessage{
+				UserId: userId,
+				RoomId: roomId,
+				Data:   string(data),
+			}
+			pubData, err := json.Marshal(pub)
+			if err != nil {
+				log.WithFields(log.Fields{
+					"targetUser": userId,
+					"data":       pub.Data,
+				}).Errorf("[Broadcaster] failed to marshal pub message, err = %s", err)
+				return err
+			}
+
 			message := queue.Message{
-				Data: string(data),
+				Data: string(pubData),
 			}
 			util.RedisQueue.Publish(getChannel(roomId), message)
 			continue

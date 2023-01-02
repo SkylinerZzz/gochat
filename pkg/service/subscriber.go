@@ -5,7 +5,6 @@ import (
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
 	"gochat/common"
-	"gochat/modelv2"
 	"gochat/pkg/queue"
 	"gochat/util"
 )
@@ -64,9 +63,10 @@ func (s *Subscriber) Name() string {
 }
 
 func (s *Subscriber) process(message queue.Message) error {
-	data := modelv2.Message{}
-	wsMessage := common.WsMessage{Data: &data}
-	err := json.Unmarshal([]byte(message.Data), &wsMessage)
+	//data := modelv2.Message{}
+	//wsMessage := common.WsMessage{Data: &data}
+	sub := common.PubSubMessage{}
+	err := json.Unmarshal([]byte(message.Data), &sub)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"queueName": message.QueueName,
@@ -76,7 +76,7 @@ func (s *Subscriber) process(message queue.Message) error {
 	}
 
 	//  search local client map
-	v, ok := common.ClientMap[data.RoomId].Load(data.UserId)
+	v, ok := common.ClientMap[sub.RoomId].Load(sub.UserId)
 	if !ok {
 		return nil
 	}
@@ -85,7 +85,7 @@ func (s *Subscriber) process(message queue.Message) error {
 		"userId": wsClient.UserId,
 		"roomId": wsClient.RoomId,
 	}).Info("[Subscriber] selected to process message")
-	err = wsClient.Conn.WriteMessage(websocket.TextMessage, []byte(message.Data))
+	err = wsClient.Conn.WriteMessage(websocket.TextMessage, []byte(sub.Data))
 	// record error
 	if err != nil {
 		log.Errorf("[Subscriber] failed to write ws message, err = %s", err)

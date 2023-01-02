@@ -44,3 +44,10 @@ const (
 	UserStatusOnline = iota
 	UserStatusOffline
 )
+
+// PubSubMessage wraps WsMessage, sending to given user
+type PubSubMessage struct {
+	UserId string `json:"user_id"` // target user
+	RoomId string `json:"room_id"` // room id
+	Data   string `json:"data"`    // WsMessage
+}
