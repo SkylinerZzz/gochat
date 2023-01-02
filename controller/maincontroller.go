@@ -202,6 +202,10 @@ func NewRoom(c *gin.Context) {
 // Search lists rooms by name
 func Search(c *gin.Context) {
 	roomName := c.PostForm("room_name")
+	if roomName == "" {
+		c.JSON(http.StatusOK, gin.H{"msg": "Room name is empty"})
+		return
+	}
 	rooms, err := modelv2.FindRoomsByName(roomName)
 	if err != nil {
 		log.Errorf("[Search] failed to find rooms by name, err = %s", err)

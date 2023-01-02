@@ -18,6 +18,16 @@ function search(){
 
 function processData(data){
     $("#searchResult").empty();
+    if (data.hasOwnProperty("msg")){
+        let msg=data["msg"];
+        $("#btnCloseAlert").click();
+        let btn='<button type="button" class="btn-close" data-bs-dismiss="alert" id="btnCloseAlert"></button>';
+        let text='<strong>'+msg+'</strong>';
+        let div0=$('<div class="alert alert-danger alert-dismissible fade show">').append(btn,text);
+        $("#alertDock").append(div0);
+        window.setTimeout("closeAlert()",3000)
+        return;
+    }
     let len=data.length;
     if (len==0){
         $("#btnCloseAlert").click();
