@@ -42,3 +42,9 @@ func DelSession(c *gin.Context) {
 		log.Errorf("session: failed to delete user info, err = %s", err)
 	}
 }
+
+func UpdateSession(c *gin.Context, key string, value string) {
+	info := GetSession(c)
+	info[key] = value
+	SetSession(c, info)
+}

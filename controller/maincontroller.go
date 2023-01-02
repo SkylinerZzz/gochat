@@ -218,15 +218,21 @@ func Search(c *gin.Context) {
 
 // RoomPage is responsible for displaying room page
 func RoomPage(c *gin.Context) {
+	// store room name
+	roomName := c.Query("room_name")
+	session.UpdateSession(c, "room_name", roomName)
+
 	user := session.GetSession(c)
 	log.WithFields(log.Fields{
 		"userId":   user["user_id"],
 		"username": user["username"],
+		"roomName": user["room_name"],
 	}).Info("welcome to the room")
 
 	c.HTML(http.StatusOK, "room.html", gin.H{
-		"userId":   user["user_id"],
-		"username": user["username"],
-		"roomId":   c.Param("roomId"),
+		"userId":    user["user_id"],
+		"username":  user["username"],
+		"roomId":    c.Param("roomId"),
+		"room_name": user["room_name"],
 	})
 }

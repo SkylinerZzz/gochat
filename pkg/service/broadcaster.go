@@ -79,12 +79,6 @@ func (b *Broadcaster) Exec(val ...interface{}) error {
 		}
 		// search local client map
 		v, ok := common.ClientMap[roomId].Load(userId)
-		common.ClientMap[roomId].Range(func(key any, value any) bool {
-			log.WithFields(log.Fields{
-				"userId": userId,
-			}).Infof("[Debug] ??%v", key)
-			return false
-		})
 		if !ok {
 			// publish ws message to let other server handle this message that has corresponding client map
 			// fill PubSubMessage

@@ -29,21 +29,26 @@ function wsConnect(){
         let msg=JSON.parse(e.data);
         console.log("message type",msg.type);
         let data=msg.data;
+        let div0;
+        let div1;
         switch (msg.type){
             case 0: // msgTypeOnline
-                let v=data.username+" enters into the room "+data.room_id;
-                $("#messageArea").append('<li class="public">'+v+'</li>');
+                div0='<div class="public text-center">'+data.username+" enters into the room"+'</div>';
+                div1=$('<div class="list-group-item border-0">').append(div0);
+                $("#messageArea").append(div1);
                 break;
             case 1:
-                let msgHead='<span class="head">'+data.username+'(room '+data.room_id+'):'+'</span><br>';
-                let msgBody='<span class="body">'+data.content+'</span>';
-                let msgItem;
-                if(userId==data.user_id){ // sender
-                    msgItem=$('<li class="send"/>').append(msgHead,msgBody);
-                }else{ // receiver
-                    msgItem=$('<li class="receive"/>').append(msgHead,msgBody);
+                if (userId==data.user_id){
+                    let head='<span class="head">'+data.username+':'+'</span>';
+                    let body='<span class="body bg-primary text-light rounded ps-0">'+data.content+'</span>';
+                    div0=$('<div class="row send">').append(head,body);
+                }else{
+                    let head='<span class="head">'+data.username+':'+'</span>';
+                    let body='<span class="body ps-0">'+data.content+'</span>';
+                    div0=$('<div class="row receive">').append(head,body);
                 }
-                $("#messageArea").append(msgItem);
+                div1=$('<div class="list-group-item border-0">').append(div0);
+                $("#messageArea").append(div1);
                 break;
         }
         let m=document.getElementById("messageArea");
@@ -62,7 +67,7 @@ function wsClose(){
     ws.send(msg);
     ws.close();
 }
-function sendMsg(){
+function send(){
     let content=$("#inputArea").val();
     $("#inputArea").val("");
     $("#sendBtn").attr("disabled",true);

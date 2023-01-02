@@ -47,7 +47,7 @@ function processData(data){
         let createdAt=new Date(data[i]["CreatedAt"]).toLocaleDateString();
         console.log(roomId,roomName,username,createdAt);
 
-        let href="room/"+roomId;
+        let href="/room/"+roomId+"?room_name="+roomName;
         let title='<h5 class="mb-0">'+roomName+'</h5>';
         let owner='<p class="mb-0 opacity-75">'+username+'</p>';
         let div0=$('<div>').append(title,owner);

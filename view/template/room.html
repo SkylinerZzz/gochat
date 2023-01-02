@@ -2,77 +2,69 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Room_GoChat</title>
+    <title>Room | GoChat</title>
+    <link href="/view/bootstrap-5.3.0-alpha1-dist/css/bootstrap.css" rel="stylesheet">
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/view/bootstrap-5.3.0-alpha1-dist/js/bootstrap.bundle.js"></script>
     <script src="/view/static/js/room.js"></script>
+    <link href="/view/static/css/room.css" rel="stylesheet">
 </head>
-<style>
-    *{
-        margin: 0;
-        padding: 0;
-    }
-    .bottom{
-        margin: auto;
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-    }
-    ul{
-        border: 1px solid gray;
-        width: 400px;
-        height: 500px;
-        margin: 0 auto;
-        background: whitesmoke;
-        overflow: auto;
-        line-height: 30px;
-    }
-    li{
-        list-style-type: none;
-    }
-    span{
-        display: inline-block;
-        width: auto;
-        word-break: break-all;
-        white-space: normal;
-    }
-    .public{
-        font-size: 8px;
-        color: gray;
-        float: left;
-        width: 100%;
-    }
-    .send{
-        float: right;
-        width: 50.1%;
-        background: #1B80D0;
-        text-align: left;
-    }
-    .receive{
-        float: left;
-        width: 50.1%;
-        background: white;
-        text-align: left;
-    }
-    .head{
-        font-size: 8px;
-    }
-    .body{
-        font-size: 16px;
-        text-indent: 2em;
-    }
-</style>
 <body>
 <input type="hidden" id="userId" value="{{.userId}}">
 <input type="hidden" id="username" value="{{.username}}">
 <input type="hidden" id="roomId" value="{{.roomId}}">
-<div style="text-align: center">
-    <div>
-        <ul id="messageArea"></ul>
+<nav class="navbar navbar-expand-sm bg-light navbar-light">
+    <div class="container-fluid">
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item">
+                    <a class="navbar-brand">{{.room_name}}</a>
+                </li>
+            </ul>
+        </div>
     </div>
-    <div class="bottom">
-        <textarea type="text" style="resize: none" id="inputArea" cols="50" maxlength="153" placeholder="say something ..."></textarea>
-        <button id="sendBtn" onclick="sendMsg()" disabled>Send</button>
+</nav>
+<div class="container mt-3 mb-3 p-3" style="width: 75%">
+    <div class="list-group overflow-y-auto border" style="height: 400px;" id="messageArea">
+        <!--
+        <div class="list-group-item border-0">
+            <div class="public text-center">developer enters into the room</div>
+        </div>
+        <div class="list-group-item border-0">
+            <div class="row receive">
+                <span class="head">developer</span>
+                <span class="body">hello</span>
+            </div>
+        </div>
+        <div class="list-group-item border-0">
+            <div class="row send">
+                <span class="head">developer</span>
+                <span class="body bg-primary text-light rounded">hello</span>
+            </div>
+        </div>
+        <div class="list-group-item border-0">
+            <div class="row receive">
+                <span class="head">developer</span>
+                <span class="body">hello</span>
+            </div>
+        </div>
+        -->
+    </div>
+    <div class="btn-group">
+        <button class="btn btn-outline-light" style="width: 50%">
+            <img src="/view/static/icon/image.ico" style="width: 20px;height: 20px">
+        </button>
+        <button class="btn btn-outline-light" style="width: 50%">
+            <img src="/view/static/icon/folder.ico" style="width: 20px;height: 20px">
+        </button>
+    </div>
+    <div class="row">
+        <div class="col-10 pe-1">
+            <textarea class="form-control" style="resize: none" rows="1" maxlength="300" id="inputArea"></textarea>
+        </div>
+        <div class="col-2 ps-1">
+            <button class="btn btn-primary" style="width: 100%" id="sendBtn" onclick="send()" disabled>Send</button>
+        </div>
     </div>
 </div>
 </body>
