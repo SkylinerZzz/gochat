@@ -1,10 +1,10 @@
-function login(){
+function newRoom(){
+    let roomName=document.getElementById("room_name").value;
+    let userId=document.getElementById("userId").value;
     let username=document.getElementById("username").value;
-    let password=document.getElementById("password").value;
     let xmlHttp=new XMLHttpRequest();
     xmlHttp.onreadystatechange=function (){
         if(xmlHttp.readyState==4&&xmlHttp.status==200){
-            console.log(this.responseText);
             let data=JSON.parse(this.responseText);
             processData(data);
         }
@@ -12,11 +12,12 @@ function login(){
             alertError();
         }
     }
-    xmlHttp.open("POST","/login");
+    xmlHttp.open("POST","/index/new");
     xmlHttp.setRequestHeader("Content-Type","application/json");
     xmlHttp.send(JSON.stringify({
+        "room_name":roomName,
         "username":username,
-        "password":password
+        "user_id":userId
     }));
 }
 

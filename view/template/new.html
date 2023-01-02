@@ -6,22 +6,23 @@
     <link href="/view/bootstrap-5.3.0-alpha1-dist/css/bootstrap.css" rel="stylesheet">
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.js" type="text/javascript" charset="utf-8"></script>
     <script src="/view/bootstrap-5.3.0-alpha1-dist/js/bootstrap.bundle.js"></script>
+    <script src="/view/static/js/new.js"></script>
 </head>
 <body>
 <div class="container p-3 my-5 border" style="width: 25%">
     <h4 class="text-center">Create new room</h4>
-    <form action="/index/new" method="post">
-        <input type="hidden" id="userId" name="user_id" value="{{.userId}}">
-        <input type="hidden" id="username" name="username" value="{{.username}}">
-        <div class="form-floating mb-3 mt-3">
-            <input type="text" class="form-control" id="room_name" placeholder="Room name" name="room_name">
-            <label for="room_name">Room name</label>
-        </div>
-        <div class="d-grid gap-2">
-            <button type="submit" class="btn btn-primary">OK</button>
-            <a href="/index" class="btn btn-secondary">Cancel</a>
-        </div>
-    </form>
+    <!--<form action="/index/new" method="post">-->
+    <input type="hidden" id="userId" name="user_id" value="{{.userId}}">
+    <input type="hidden" id="username" name="username" value="{{.username}}">
+    <div class="form-floating mb-3 mt-3">
+        <input type="text" class="form-control" id="room_name" placeholder="Room name" name="room_name">
+        <label for="room_name">Room name</label>
+    </div>
+    <div class="d-grid gap-2">
+        <button class="btn btn-primary" onclick="newRoom()">OK</button>
+        <a href="/index" class="btn btn-secondary">Cancel</a>
+    </div>
+    <!--</form>-->
 </div>
 </body>
 </html>

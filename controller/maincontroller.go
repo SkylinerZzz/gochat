@@ -13,7 +13,6 @@ import (
 func LoginPage(c *gin.Context) {
 	// user has logged in recently
 	if session.GetSession(c) != nil {
-		log.Info("?")
 		c.Redirect(http.StatusFound, "/index")
 		return
 	}
@@ -25,6 +24,7 @@ func Login(c *gin.Context) {
 	var u modelv2.UserInfo
 	if err := c.ShouldBind(&u); err != nil {
 		log.Errorf("[Login] failed to parse form, err = %s", err)
+		c.JSON(http.StatusServiceUnavailable, nil)
 		return
 	}
 	// input can not be empty
@@ -35,20 +35,24 @@ func Login(c *gin.Context) {
 
 	if u.Username == "" {
 		log.Info("[Login] user name is empty")
-		c.Writer.Write([]byte("<script>alert('please input username')</script>"))
-		c.HTML(http.StatusOK, "login.html", nil)
+		//c.Writer.Write([]byte("<script>alert('please input username')</script>"))
+		//c.HTML(http.StatusOK, "login.html", nil)
+		c.JSON(http.StatusOK, gin.H{"msg": "Username is empty"})
 		return
 	}
 	if u.Password == "" {
 		log.Info("[Login] password is empty")
-		c.Writer.Write([]byte("<script>alert('please input password')</script>"))
-		c.HTML(http.StatusOK, "login.html", nil)
+		//c.Writer.Write([]byte("<script>alert('please input password')</script>"))
+		//c.HTML(http.StatusOK, "login.html", nil)
+		c.JSON(http.StatusOK, gin.H{"msg": "Password is empty"})
 		return
 	}
 
 	user, err := modelv2.FindUserByName(u.Username)
 	if err != nil {
 		log.Errorf("[Login] failed to find user by name, err = %s", err)
+		c.JSON(http.StatusServiceUnavailable, nil)
+		return
 	}
 	if user.ID > 0 && user.Password == u.Password {
 		// login succeeded
@@ -58,8 +62,9 @@ func Login(c *gin.Context) {
 		return
 	} else {
 		// login failed
-		c.Writer.Write([]byte("<script>alert('incorrect username or password')</script>"))
-		c.HTML(http.StatusOK, "login.html", nil)
+		//c.Writer.Write([]byte("<script>alert('incorrect username or password')</script>"))
+		//c.HTML(http.StatusOK, "login.html", nil)
+		c.JSON(http.StatusOK, gin.H{"msg": "Incorrect username or password"})
 		return
 	}
 }
@@ -74,6 +79,7 @@ func Signup(c *gin.Context) {
 	var u modelv2.UserInfo
 	if err := c.ShouldBind(&u); err != nil {
 		log.Errorf("[Register] failed to parse form, err = %s", err)
+		c.JSON(http.StatusServiceUnavailable, nil)
 		return
 	}
 	log.WithFields(log.Fields{
@@ -85,31 +91,38 @@ func Signup(c *gin.Context) {
 	namePattern := "^[a-zA-Z0-9_-]{4,20}$"
 	pwdPattern := "^[a-zA-Z0-9]{6,20}$"
 	if m, _ := regexp.MatchString(namePattern, u.Username); !m {
-		c.Writer.Write([]byte("<script>alert('invalid username')</script>"))
-		c.HTML(http.StatusOK, "signup.html", nil)
+		//c.Writer.Write([]byte("<script>alert('invalid username')</script>"))
+		//c.HTML(http.StatusOK, "signup.html", nil)
+		c.JSON(http.StatusOK, gin.H{"msg": "Invalid username"})
 		return
 	}
 	if m, _ := regexp.MatchString(pwdPattern, u.Password); !m {
-		c.Writer.Write([]byte("<script>alert('invalid password')</script>"))
-		c.HTML(http.StatusOK, "signup.html", nil)
+		//c.Writer.Write([]byte("<script>alert('invalid password')</script>"))
+		//c.HTML(http.StatusOK, "signup.html", nil)
+		c.JSON(http.StatusOK, gin.H{"msg": "Invalid password"})
 		return
 	}
 
 	ex, err := modelv2.CheckUserExists(u.Username)
 	if err != nil {
 		log.Errorf("[Signup] failed to check whether username exists, err = %s", err)
+		c.JSON(http.StatusServiceUnavailable, nil)
+		return
 	}
 	if ex {
 		// user exists
 		log.Info("username already exists")
-		c.Writer.Write([]byte("<script>alert('username already exists')</script>"))
-		c.HTML(http.StatusOK, "signup.html", nil)
+		//c.Writer.Write([]byte("<script>alert('username already exists')</script>"))
+		//c.HTML(http.StatusOK, "signup.html", nil)
+		c.JSON(http.StatusOK, gin.H{"msg": "Username already exists"})
 		return
 	} else {
 		// sign up succeeded
 		err = modelv2.AddUser(u)
 		if err != nil {
 			log.Errorf("[Signup] failed to add user, err = %s", err)
+			c.JSON(http.StatusServiceUnavailable, nil)
+			return
 		}
 		c.Redirect(http.StatusFound, "/login")
 		return
@@ -157,6 +170,7 @@ func NewRoom(c *gin.Context) {
 	var r modelv2.RoomInfo
 	if err := c.ShouldBind(&r); err != nil {
 		log.Errorf("[NewRoom] failed to parse form, err = %s", err)
+		c.JSON(http.StatusServiceUnavailable, nil)
 		return
 	}
 	log.WithFields(log.Fields{
@@ -166,14 +180,18 @@ func NewRoom(c *gin.Context) {
 
 	namePattern := "^[a-zA-Z0-9_-]{1,20}$"
 	if m, _ := regexp.MatchString(namePattern, r.RoomName); !m {
-		c.Writer.Write([]byte("<script>alert('invalid name')</script>"))
-		c.HTML(http.StatusOK, "new.html", nil)
+		//c.Writer.Write([]byte("<script>alert('invalid name')</script>"))
+		//c.HTML(http.StatusOK, "new.html", nil)
+		c.JSON(http.StatusOK, gin.H{"msg": "Invalid room name"})
 		return
 	}
 	err := modelv2.AddRoom(r)
 	if err != nil {
 		log.Errorf("[NewRoom] failed to add room, err = %s", err)
+		c.JSON(http.StatusServiceUnavailable, nil)
+		return
 	}
+
 	log.Info(user["username"], " create a new room")
 	c.Redirect(http.StatusFound, "/index")
 }
@@ -185,6 +203,7 @@ func Search(c *gin.Context) {
 	if err != nil {
 		log.Errorf("[Search] failed to find rooms by name, err = %s", err)
 		c.JSON(http.StatusServiceUnavailable, nil)
+		return
 	}
 
 	c.JSON(http.StatusOK, rooms)

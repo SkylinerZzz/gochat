@@ -6,27 +6,29 @@
     <link href="/view/bootstrap-5.3.0-alpha1-dist/css/bootstrap.css" rel="stylesheet">
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.js" type="text/javascript" charset="utf-8"></script>
     <script src="/view/bootstrap-5.3.0-alpha1-dist/js/bootstrap.bundle.js"></script>
+    <script src="/view/static/js/login.js"></script>
 </head>
 <body>
+<div class="container mt-3" style="width: 35%" id="alertDock"></div>
 <div class="container p-3 my-5 border" style="width: 25%">
     <h4 class="text-center">Welcome to GoChat</h4>
-    <form action="/login" method="post">
-        <div class="form-floating mb-3 mt-3">
-            <input type="text" class="form-control" id="username" placeholder="Username" name="username">
-            <label for="username">Username</label>
-        </div>
-        <div class="form-floating mb-0">
-            <input type="password" class="form-control" id="password" placeholder="Password" name="password">
-            <label for="password">Password</label>
-        </div>
-        <div class="mb-3 text-end">
-            <a href="/account-recovery" style="font-size: xx-small">Forgot password?</a>
-        </div>
-        <div class="d-grid gap-2">
-            <button type="submit" class="btn btn-primary">Log in</button>
-            <a href="/signup" class="btn btn-secondary">Sign up</a>
-        </div>
-    </form>
+    <!--<form action="/login" method="post">-->
+    <div class="form-floating mb-3 mt-3">
+        <input type="text" class="form-control" id="username" placeholder="Username" name="username">
+        <label for="username">Username</label>
+    </div>
+    <div class="form-floating mb-0">
+        <input type="password" class="form-control" id="password" placeholder="Password" name="password">
+        <label for="password">Password</label>
+    </div>
+    <div class="mb-3 text-end">
+        <a href="/account-recovery" style="font-size: xx-small">Forgot password?</a>
+    </div>
+    <div class="d-grid gap-2">
+        <button class="btn btn-primary" onclick="login()">Log in</button>
+        <a href="/signup" class="btn btn-secondary">Sign up</a>
+    </div>
+    <!--</form>-->
 </div>
 </body>
 </html>

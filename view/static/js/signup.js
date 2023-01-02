@@ -1,10 +1,9 @@
-function login(){
+function signup(){
     let username=document.getElementById("username").value;
     let password=document.getElementById("password").value;
     let xmlHttp=new XMLHttpRequest();
     xmlHttp.onreadystatechange=function (){
         if(xmlHttp.readyState==4&&xmlHttp.status==200){
-            console.log(this.responseText);
             let data=JSON.parse(this.responseText);
             processData(data);
         }
@@ -12,7 +11,7 @@ function login(){
             alertError();
         }
     }
-    xmlHttp.open("POST","/login");
+    xmlHttp.open("POST","/signup");
     xmlHttp.setRequestHeader("Content-Type","application/json");
     xmlHttp.send(JSON.stringify({
         "username":username,

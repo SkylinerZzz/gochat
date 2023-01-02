@@ -6,6 +6,9 @@ function search(){
             let data=JSON.parse(this.responseText);
             processData(data);
         }
+        if (xmlHttp.readyState==4&&xmlHttp.status==503){
+            alertError();
+        }
     }
     xmlHttp.open("POST","/index/search");
     xmlHttp.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
@@ -46,4 +49,13 @@ function processData(data){
 
 function closeAlert(){
     $("#btnCloseAlert").click();
+}
+
+function alertError(){
+    $("#btnCloseAlert").click();
+    let btn='<button type="button" class="btn-close" data-bs-dismiss="alert" id="btnCloseAlert"></button>';
+    let text='<strong>Something wrong with server</strong>';
+    let div0=$('<div class="alert alert-danger alert-dismissible fade show">').append(btn,text);
+    $("#alertDock").append(div0);
+    window.setTimeout("closeAlert()",3000)
 }
