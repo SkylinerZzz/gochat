@@ -43,7 +43,13 @@ function wsConnect(){
                     let body='<span class="body bg-primary text-light rounded ps-0">'+data.content+'</span>';
                     div0=$('<div class="row send">').append(head,body);
                 }else{
-                    let head='<span class="head">'+data.username+':'+'</span>';
+                    //let a='<a class="text-dark" style="text-decoration: none" href="">'+data.username+':'+'</a>';
+                    //'<a class="text-dark" style="text-decoration: none" href="" userId="123" username="developer" onclick="open(this)"'
+                    //let head=$('<span class="head">').append(a);
+                    let headlink=$('<a class="text-dark" style="text-decoration: none" href="javascript:void(0);" onclick="openProfile(this);return false;">').append(data.username+':');
+                    headlink.attr("userId",data.user_id);
+                    headlink.attr("username",data.username);
+                    let head=$('<span class="head">').append(headlink);
                     let body='<span class="body ps-0">'+data.content+'</span>';
                     div0=$('<div class="row receive">').append(head,body);
                 }
@@ -98,3 +104,18 @@ function postprocess(){
 }
 window.onload=preprocess;
 window.onunload=postprocess;
+
+function openProfile(obj){
+    let toUserId=obj.getAttribute("userId");
+    let toUsername=obj.getAttribute("username");
+    let userId=document.getElementById("userId").value;
+    console.log(toUserId,toUsername,userId);
+    $('#profileModal').modal("show");
+    let toUserIdElem=$('#toUserId');
+    toUserIdElem.text(toUserId);
+    $('#profileUsername').text(toUsername);
+}
+
+function privateChat(){
+
+}

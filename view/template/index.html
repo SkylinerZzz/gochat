@@ -12,15 +12,23 @@
 <nav class="navbar navbar-expand-sm bg-light navbar-light">
     <div class="container-fluid">
         <div class="collapse navbar-collapse">
+            <div class="navbar-header">
+                <a href="https://github.com/SkylinerZzz/gochat" target="_blank" class="navbar-brand">GoChat</a>
+            </div>
             <ul class="navbar-nav me-auto">
-                <li class="nav-item">
-                    <a class="navbar-brand">{{.username}}</a>
-                </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/index/new">New</a>
                 </li>
             </ul>
-            <a href="/logout" class="btn btn-outline-dark">Log out</a>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link me-3 text-primary">{{.username}}</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/logout" class="btn btn-outline-dark">Log out</a>
+                </li>
+            </ul>
+
         </div>
     </div>
 </nav>
