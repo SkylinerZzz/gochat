@@ -236,3 +236,23 @@ func RoomPage(c *gin.Context) {
 		"room_name": user["room_name"],
 	})
 }
+
+// PrivateChat gets or generates room id by users' id
+func PrivateChat(c *gin.Context) {
+	userId := c.PostForm("user_id")
+	toUserId := c.PostForm("to_user_id")
+	toUsername := c.PostForm("to_username")
+	log.WithFields(log.Fields{
+		"userId":     userId,
+		"toUserId":   toUserId,
+		"toUsername": toUsername,
+	}).Info("someone try to chat with others")
+
+	roomId, err := modelv2.GetPrivateRoomId(userId, toUserId)
+	if err != nil {
+		log.Errorf("[PrivateChat] failed to get private chat room id, err = %s", err)
+		c.JSON(http.StatusServiceUnavailable, nil)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"room_id": roomId})
+}

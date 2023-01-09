@@ -37,6 +37,7 @@ const (
 	DATABUS_IMAGE_HANDLER   = "gochat:test:image_handler"   // consumer queue of image handler
 	PREFIX_CHANNEL          = "gochat:test:channel:room_"   // prefix of channel
 	PREFIX_USER_LIST        = "gochat:test:list:room_"      // prefix of user list in each room, recording whether a user is offline or online
+	PREFIX_PRIVATE_ROOM     = "gochat:test:private:room_"   // prefix of private chat, recording corresponding room id
 )
 
 // status of user

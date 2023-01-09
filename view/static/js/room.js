@@ -77,12 +77,16 @@ function send(){
     let content=$("#inputArea").val();
     $("#inputArea").val("");
     $("#sendBtn").attr("disabled",true);
+    // if toUserId is not empty, it is a private chat message
+    let url=window.location.href;
+    let params=new URLSearchParams(url.split('?')[1]);
     let msg=JSON.stringify({
         "type":1,
         "data":{
             "user_id":userId,
             "username":username,
             "room_id":roomId,
+            "to_user_id":params.get('to_user_id'),
             "content":content
         }
     });
@@ -117,5 +121,30 @@ function openProfile(obj){
 }
 
 function privateChat(){
+    let userId=document.getElementById("userId").value;
+    let toUserId=$('#toUserId').text();
+    let toUsername=$('#profileUsername').text();
+    let postRequest=new XMLHttpRequest();
+    postRequest.onreadystatechange=function (){
+        if(postRequest.readyState==4&&postRequest.status==200){
+            console.log(this.responseText);
+            let data=JSON.parse(this.responseText);
+            processData(data);
+        }
+        if (postRequest.readyState==4&&postRequest.status==503){
+            console.log("server errors");
+        }
+    }
+    postRequest.open("POST","/private-chat");
+    postRequest.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+    postRequest.send("user_id="+userId+"&to_user_id="+toUserId+"&to_username="+toUsername);
+}
 
+function processData(data){
+    console.log(data.room_id);
+    let roomId=data.room_id;
+    let toUsername=$('#profileUsername').text();
+    let toUserId=$('#toUserId').text();
+    console.log(toUsername);
+    window.open("/room/"+roomId+"?room_name="+toUsername+"&to_user_id="+toUserId);
 }

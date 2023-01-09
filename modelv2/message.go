@@ -11,6 +11,7 @@ type Message struct {
 	UserId     string `json:"user_id" validate:"required"`
 	Username   string `json:"username" validate:"required" gorm:"-"`
 	RoomId     string `json:"room_id" validate:"required"`
+	ToUserId   string `json:"to_user_id,omitempty"` // only private chat has this field
 	Content    string `json:"content,omitempty"`
 	ImageUrl   string `json:"image_url,omitempty"`
 }
