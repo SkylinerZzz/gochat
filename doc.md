@@ -2,94 +2,56 @@
 ### structure
 ```
     gochat
-        |-controller        /* background logic */
-            |-user.go       // user register and login
-            |-home.go       // list all rooms and create new room
-            |-room.go       // enter the chatroom
-            |-server.go     // upgrade http to websocket, handle messages from connection and broadcast them
-        |-model             /* database and cache */
-            |-mysql.go      // connect to mysql
-            |-user.go       // handle user info
-            |-room.go       // handle room info
-            |-message.go    // handle message info
-            |-redis.go      //connect to redis
-            |-cache.go      // user cache and room cache
-            |-cache_test.go // test cache
+        |-common            /* global data structure */
+            |-common.go     /* 定义了WsClient、WsMessage以及PubSubMessage
+                               定义了消息类别和用户状态
+                               定义了全局的房间-用户映射
+                               定义了消息队列名和redis键前缀 */
+        |-config            /* configuration files */
+            |-config.yaml   /* redis和mysql配置 */
+        |-controller        /* backend logic */
+            |-session       /* session */     
+            |-maincontroller.go     /* HandlerFunc
+                                       包括注册、登录、登出、搜索房间、私聊 */
+            |-wscontroller.go       /* HandlerFunc
+                                       负责建立websocket连接 */
+        |-model             /* expired */
+        |-modelv2           /* database operation */
+            |-baseinfo.go   /* 定义用户和房间基本信息以及方法 */
+            |-common.go     /* 初始化validator */
+            |-message.go    /* 定义聊天信息以及方法 */
+            |-privatechat.go /* 获取私聊房间号
+                                如果是新创建的私聊就创建新的私聊房间号，这个过程需要获取分布式锁 */
+        |-pkg               /* function module */
+            |-adapter       /* code reuse based on decorator pattern */
+                |-base.go           /* 定义了QueueTask接口
+                                       定义了QueueTask状态和描述信息 
+                                       定义了Handler接口 */
+                |-logger.go         /* 实现了Handler接口，用于统计QueueTask的完成情况 */
+                |-queuetask.go      /* 定义了QueueTaskAdapter，装饰一个实现QueueTask接口的实例 */
+            |-lock          /* a simple distributed lock */
+            |-queue         /* a simple mq base on redis */
+                |-base.go           /* 定义了消息
+                                       定义了Node接口，包含生产者和消费者接口 */
+                |-queue.go  /* 装配器模式，封装实现了Node接口的实例的方法 */
+                |-redis.go  /* 定义了RedisNode
+                               基于redis的api实现了Node接口，包含发送消息、接收消息、订阅和发布 */
+            |-service       /* backend service */
+                |-base.go           /* 定义了Service接口，service下的模块都要实现这一接口 */
+                |-entry.go          /* 处理用户加入房间、订阅房间号、更新房间-用户映射以及读websocket连接 */
+                |-broadcaster.go    /* 广播消息 */
+                |-subscriber.go     /* 订阅频道并接收消息 */
+            |-task          /* QueueTask implementation */
+                |-dispatcher        /* 根据聊天信息类型将消息分发给对应的handler */
+                |-contenthandler    /* 处理文本类型聊天信息 */
         |-router            /* restful router */
-            |-router.go     
-        |-session           /* session */
-            |-session.go    
-        |-sql //DDL
-        |-static            /* icon and js, craete websocket connection */
+            |-router.go      
+        |-sql               /* DDL */
         |-util              /* utility */
-            |-safemap.go    // safe map
-        |-view              /* foreground */
-        |-main.go           // run this project!
+            |-initserver.go         /* 载入配置文件
+                                       初始化redis
+                                       初始化mysql
+                                       初始化mq */
+        |-view              /* frontend */
+        |-main.go           /* run this project! */
 ```
-### package level variables
-+ controller/server.go
-    ```
-    type Client struct {
-        Conn     *websocket.Conn
-        Username string
-        RoomId   string
-    }
-    type Message struct {
-        MsgType int         `json:"msgType"`
-        Data    interface{} `json:"data"`
-    }
-
-    var (                   
-        once    = sync.RWMutex{}
-        rooms   = make(map[string]*ClientSlice)
-        users   = make(map[string]*UserMap)
-        enter   = make(chan Client, 10)
-        leave   = make(chan Client, 10)
-        message = make(chan Message, 100)
-    )
-    ```
-  Client是客户端信息，包含一个websocket连接和用户名以及房间号；Message是客户端的消息体，包含消息类型以及消息正文。  
-  rooms的键是房间号，值是一个Client切片。代表有房间里有哪些客户端接入。  
-  users是一个嵌套map，代表指定房间（号）里有哪些用户（名）。  
-  enter是一个通道，如果websocket上接收的消息表明用户进入房间，则构造对应的客户端连接发送至此通道，并构造对应的Message发送至message通道。  
-  leave是一个通道，如果websocket上接收的消息表明用户退出房间，则构造对应的客户端连接发送至此通道，并构造对应的Message发送至message通道。  
-  message是一个通道，存放等待处理的Message。  
-  用户加入房间后服务器开启两个线程read和write。read负责从connection中读取消息并存储聊天记录。write负责从通道中接收消息，维护users用户映射和rooms客户端连接以及处理各类消息。
-+ model/mysql.go
-    ```
-    var ChatDB *gorm.DB
-    ```
-  mysql句柄
-+ model/user.go
-    ```
-    type User struct {
-        gorm.Model
-        Username string
-        Password string
-    }
-    ```
-  用户对象
-+ model/room.go
-    ```
-    type Room struct {
-        gorm.Model
-        UserId   uint
-        RoomName string
-    }
-    ```
-  房间对象
-+ model/message.go
-    ```
-    type Message struct {
-        gorm.Model
-        UserId  uint
-        RoomId  uint
-        Content string
-    }
-    ```
-  聊天记录对象
-+ model/redis.go
-    ```
-    var ChatCache redis.Conn
-    ```
-  redis句柄
