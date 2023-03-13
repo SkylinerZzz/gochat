@@ -57,10 +57,15 @@
 ```
 ### log in and sign up
 ![image](https://github.com/SkylinerZzz/gochat/blob/main/docs/img/img.png)
+---
 ### create and search room
 ![image](https://github.com/SkylinerZzz/gochat/blob/main/docs/img/img_1.png)
+---
 ### group chat
 ![image](https://github.com/SkylinerZzz/gochat/blob/main/docs/img/img_2.png)
+---
 ### private chat
 ![image](https://github.com/SkylinerZzz/gochat/blob/main/docs/img/img_3.png)
+---
 ![image](https://github.com/SkylinerZzz/gochat/blob/main/docs/img/img_4.png)
+---
