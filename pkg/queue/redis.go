@@ -12,8 +12,9 @@ import (
 
 // RedisNode definition
 type RedisNode struct {
-	redisPool   *redis.Pool // redis connection pool
-	redisClient *redis.Conn // redis connection
+	redisPool   *redis.Pool       // redis connection pool
+	redisClient *redis.Conn       // redis connection
+	config      map[string]string // redis configuration
 }
 
 func NewRedisNode(config map[string]string) (*RedisNode, error) {
@@ -33,7 +34,7 @@ func NewRedisNode(config map[string]string) (*RedisNode, error) {
 		log.Errorf("[RedisNode] failed to connect to redis, err = %s", err)
 		return nil, err
 	}
-	return &RedisNode{redisPool: pool, redisClient: &conn}, nil
+	return &RedisNode{redisPool: pool, redisClient: &conn, config: config}, nil
 }
 
 func (r *RedisNode) ReceiveMessage(queueName string, timeout time.Duration) (Message, error) {
@@ -116,11 +117,46 @@ func (r *RedisNode) Subscribe(channel string) <-chan Message {
 				// send subscription message to chan
 				subChan <- message
 			case error:
-				log.Errorf("[Subscribe] err = %s", msg)
+				err = r.reSubscribe(&pubSubConn, channel)
+				if err != nil {
+					log.Errorf("[Subscribe] err = %s", err)
+					return
+				}
+				// log.Errorf("[Subscribe] err = %s", msg)
 			}
 		}
 	}()
 	return subChan
+}
+
+// try to get new redis connection
+func (r *RedisNode) reconnect() (*redis.Conn, error) {
+	addr := fmt.Sprintf("%s:%s", r.config["redis_host"], r.config["redis_port"])
+	conn, err := redis.Dial("tcp", addr, redis.DialPassword(r.config["redis_password"]), redis.DialKeepAlive(5*time.Minute))
+	return &conn, err
+}
+
+// close old pubSubConn and reSubscribe given channel
+func (r *RedisNode) reSubscribe(pubSubConn *redis.PubSubConn, channel string) error {
+	err := (*pubSubConn).Close()
+	if err != nil {
+		log.Errorf("[reSubscribe] failed to close old connection, err = %s", err)
+		return err
+	}
+
+	r.redisClient, err = r.reconnect()
+	if err != nil {
+		log.Errorf("[reSubscribe] failed to reconnect, err = %s", err)
+		return err
+	}
+
+	pubSubConn = &redis.PubSubConn{Conn: *r.redisClient}
+	err = pubSubConn.Subscribe(channel)
+	if err != nil {
+		log.Errorf("[reSubscribe] failed to subscribe channel, err = %s", err)
+		return err
+	}
+	return nil
 }
 
 func (r *RedisNode) Publish(channel string, message Message) error {
