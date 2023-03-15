@@ -9,6 +9,8 @@ import (
 	"gochat/pkg/task"
 	"gochat/router"
 	"gochat/util"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"strconv"
@@ -37,6 +39,13 @@ func main() {
 	// init router
 	r := router.Init()
 	go r.Run(addr)
+
+	// start pprof
+	go func() {
+		if err := http.ListenAndServe(":6060", nil); err != nil {
+			fmt.Println("exit pprof")
+		}
+	}()
 
 	// listen terminate signal
 	wg := sync.WaitGroup{}
