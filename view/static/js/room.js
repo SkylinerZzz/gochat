@@ -6,7 +6,8 @@ function wsConnect(){
     userId=document.getElementById("userId").value;
     username=document.getElementById("username").value;
     roomId=document.getElementById("roomId").value;
-    let uri="ws://localhost:8080/room/ws"+"?room_id="+roomId+"&user_id="+userId;
+    //let uri="ws://localhost:8080/room/ws"+"?room_id="+roomId+"&user_id="+userId;
+    let uri="ws://localhost/room/ws"+"?room_id="+roomId+"&user_id="+userId;
     ws=new WebSocket(uri);
     ws.onopen=function (){
         console.log("connected to "+uri+" at "+Date());
