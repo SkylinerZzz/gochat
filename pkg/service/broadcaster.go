@@ -2,6 +2,7 @@ package service
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gomodule/redigo/redis"
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
@@ -78,6 +79,37 @@ func (b *Broadcaster) Exec(val ...interface{}) error {
 			continue
 		}
 		// search local client map
+		if common.ClientMap[roomId] == nil {
+			fmt.Println("break point1")
+			common.ClientMapMutex.RLock()
+			fmt.Println("break point2")
+			if common.ClientMap[roomId] == nil {
+				// publish ws message to let other server handle this message that has corresponding client map
+				// fill PubSubMessage
+				pub := common.PubSubMessage{
+					UserId: userId,
+					RoomId: roomId,
+					Data:   string(data),
+				}
+				pubData, err := json.Marshal(pub)
+				if err != nil {
+					log.WithFields(log.Fields{
+						"targetUser": userId,
+						"data":       pub.Data,
+					}).Errorf("[Broadcaster] failed to marshal pub message, err = %s", err)
+					common.ClientMapMutex.RUnlock()
+					return err
+				}
+
+				message := queue.Message{
+					Data: string(pubData),
+				}
+				util.RedisQueue.Publish(getChannel(roomId), message)
+				common.ClientMapMutex.RUnlock()
+				continue
+			}
+			common.ClientMapMutex.RUnlock()
+		}
 		v, ok := common.ClientMap[roomId].Load(userId)
 		if !ok {
 			// publish ws message to let other server handle this message that has corresponding client map
